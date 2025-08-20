@@ -1,0 +1,329 @@
+﻿@model IEnumerable<Object>
+@{
+    String tBuscarProgramas = (String) Model.ElementAt(4);
+    SistemasBIPS.Models.ObjetoUsuarioLogeado objetoSesion = (SistemasBIPS.Models.ObjetoUsuarioLogeado) Session["usuarioLogeado"];
+    bool esAdministrador = objetoSesion.esAdministrador ? true : false;
+    IEnumerable<MDS.Dto.ProgramaDto> programs = (IEnumerable<MDS.Dto.ProgramaDto>)Model.ElementAt(3);
+    SistemasBIPS.Models.MantenedorModel constantes = SistemasBIPS.Models.MantenedorModel.Instance();
+    SistemasBIPS.Models.Header dataHeader = (SistemasBIPS.Models.Header)Model.ElementAt(5);
+    SistemasBIPS.Models.Admin dataAdmin = (SistemasBIPS.Models.Admin)Model.ElementAt(6);
+    int anoo = DateTime.Now.Year;
+    int conta =0;
+    string usuarioLogeado = objetoSesion.datosUsuario.Emailusuariomds;
+    for(int a= 0; a < programs.Count();a++){
+        if (programs.ElementAt(a).Ano == anoo){ conta = a+1; }
+    }
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
+    <meta http-equiv="Expires" content="0" />
+    <meta http-equiv="Last-Modified" content="0" />
+    <meta http-equiv="Cache-Control" content="no-cache, mustrevalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <link href=@Url.Content("~/Content/Images/favicon.ico") rel="shortcut icon" type="image/x-icon" />
+    <title>Sistema Carga BIPS - Ministerio de Desarrollo Social</title>
+    @Styles.Render("~/Content/Sitio1")
+    @Styles.Render("~/Content/Sitio2")
+    @Styles.Render("~/Content/JqueryUICSS")
+    @Scripts.Render("~/bundles/Jquery")
+    @Scripts.Render("~/bundles/JqueryUI")
+</head>
+<body>
+    @using (Html.BeginForm())
+    {
+        <input type="hidden" id="anoPrograma" name="anoPrograma" value="@anoo" />
+        <input type="hidden" id="progNuevo" name="progNuevo" value="@constantes.tipoProgNuevo" />
+        <input type="hidden" id="progReformulado" value="@constantes.tipoProgReformulado" />
+        <input type="hidden" id="progVigente" value="@constantes.tipoProgVigente" />
+        <!--Mensajes-->
+        <div id="dialogos" title="Información"><span id="lblMensajes"></span></div>
+        <!--Barra superior-->
+        <div class="cabecGeneral">@Html.Partial("~/Views/Shared/_Header.cshtml", @dataHeader)</div>
+        <div id="contenedor">
+            <!--Pantalla de Carga-->
+            <div id="div_carga"><img id="cargador" src="@Url.Content("~/Content/Images/ajax-loader.gif")" alt=""/></div>
+            <!--Contenido-->
+            <div id="contenidoProgramas">
+                <!--MENU ADMINISTRACION-->
+                @Html.Partial("~/Views/Shared/_Administracion.cshtml", @dataAdmin)
+                <!--Bloque de Filtros por Ministerio y Servicio-->
+                <!--Tabs de años anteriores-->
+                <div id="bloqueTabs">
+                    <ul class="tabs">
+                        @foreach (var item1 in (IEnumerable<MDS.Dto.Business.ProgramaDto>) Model.ElementAt(3)) {
+                            <li><a href="#tab1" id="@item1.Ano">@item1.Ano</a></li>
+                        }
+                    </ul>
+                </div>
+                <!--Bloque de Programas-->
+                <div class="tab_container">
+                    <div id="tab1" class="tab_content">
+                        <div id="cabeceraTablaProgramas">
+                            <table class="tblProgramas">
+                                <tr>
+                                    <th width="12.2%">@Html.DropDownList("selecMinisterio", (IEnumerable<SelectListItem>)Model.ElementAt(0), new { onchange = "filtrar()", style = "width:100%" })</th>
+                                    <th width="12%">@Html.DropDownList("selecInstitucion", (IEnumerable<SelectListItem>)Model.ElementAt(1), new { onchange = "filtrar()", style = "width:100%" })</th>
+                                    <th width="8%">
+                                        <select id="cmbTipoPrograma" style="width:100%">
+                                            <option value="-1">Seleccione tipo</option>
+                                            <option value="1">Nuevo</option>
+                                            <option value="2">Reformulado</option>
+                                            <option value="3">Programa social</option>
+                                            <option value="4">Iniciativa social</option>
+                                            <option value="5">Programa social 2</option>
+                                            <option value="6">Iniciativa social 2</option>
+                                        </select>
+                                    </th>
+                                    <th width="42%">Nombre</th>
+                                    <th width="11.4%">Etapa</th>
+                                </tr>
+                            </table>
+                        </div>
+                        <div id="cuerpoTablaProgramas">
+                            <table class="tblProgramas" id="tblProgramas">
+                                @if (Model.ElementAt(2) != null){
+                                    foreach (var item in (IEnumerable<MDS.Dto.Business.ProgramaDto>)Model.ElementAt(2)) {
+                                    <tr>
+                                        <td width="12.2%">@item.IdMinisterio.Descripcion</td>
+                                        <td width="12%">@item.IdServicio.Descripcion</td>
+                                        <td width="8%">@item.TipoProgramaER</td>
+                                        <td width="42%">@item.Nombre</td>
+                                        <td width="11.4%">@item.IdEtapa.Nombre</td>
+                                    </tr>
+                                    }
+                                }else{
+                                    <tr><td colspan="5"><div style="text-align:center"> No se han encontrado Registros para el filtro seleccionado</div></td></tr>
+                                }
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--Pie de página-->
+            <div id="footer">
+                <p style="margin-left:25%">Todos los derechos reservados Ministerio de Desarrollo Social - Oficina de Apoyo informático.</p>
+                <p style="margin-left:35%">Ahumada 48, Santiago, Chile. Teléfono (56-2) 2 675 1400</p>
+                <p style="color:#0065BD; font-weight:bolder; margin-left:20%"><b><b>Para un mejor uso de la plataforma se recomienda la utilización de Google Chrome o Internet Explorer 9 (o mayor)</b></b></p>
+            </div>
+        </div>
+    }        
+    <script type="text/javascript">
+        var ROOT = "@Url.Content("~/")";
+        $(document).ready(function () {
+            fecha = new Date();
+            var anio = fecha.getFullYear();
+            $(".tab_content").hide();
+            @if(tBuscarProgramas == "") { <text>filtraAnos(anio,$("#cmbTipoPrograma").val());</text> }
+            $("ul.tabs li").slice(@conta-1, @conta).addClass("active").show();
+            $(".tab_content:first").show();
+            $("ul.tabs li").click(function () {
+                $("ul.tabs li").removeClass("active");
+                $(this).addClass("active");
+                $(".tab_content").hide();
+                filtraAnos($(this).find("a").attr("id"),$("#cmbTipoPrograma").val());
+                document.getElementById("anoPrograma").value = $(this).find("a").attr("id");
+                var activeTab = $(this).find("a").attr("href");
+                $(activeTab).fadeIn();
+                $("#txtBuscarProgramas").attr("placeholder", "Buscar en año " + $(this).find("a").attr("id"));
+                return false;
+            });
+            $("#selecMinisterio").change(function() { fillCombo("selecInstitucion", $("#selecMinisterio").val()); });
+            $("#cmbTipoPrograma option[value='-1']").attr("selected",true);
+            $("#cmbTipoPrograma").change(function () {
+                var anoSeleccionado = document.getElementById("anoPrograma").value == "" ? (new Date).getFullYear() : document.getElementById("anoPrograma").value;
+                filtraAnos(anoSeleccionado,$("#cmbTipoPrograma").val());
+            });
+            $('form').keypress(function(e){ if(e.which == 13){ return false; } });
+            $('input').keypress(function(e){ if(e.which == 13){ return false; } });
+            //redimensiona popup
+            $(window).resize(function () {
+                // dimensiones de la ventana del explorer
+                var wscr = $(window).width();
+                var hscr = $(window).height();
+                // obtiendo tamaño de la ventana modal
+                var wcnt = $('.ui-dialog').width();
+                var hcnt = $('.ui-dialog').height();
+                // obtener posicion central
+                var mleft = (wscr - wcnt) / 2;
+                var mtop = (hscr - hcnt) / 2;
+                // estableciendo ventana modal en el centro
+                $('.ui-dialog').css("left", mleft + 'px');
+                $('.ui-dialog').css("top", mtop + 'px');
+            });
+        });
+        $.ajaxSetup({ cache: false });
+        $(document).ajaxStart(function() { $("#div_carga").show(); });
+        $(document).ajaxStop(function() { $("#div_carga").hide(); });
+
+        function filtraAnos(id, tipoPrograma) {
+            var a=0;
+            //var ruta;
+            var tipoProg;
+            var ficha = "";
+            document.getElementById("anoPrograma").value = id;
+            $.getJSON("@Url.Action("filtrarAnosPrograma")" + "/" + id + "," + $("#selecMinisterio").val() + "," + $("#selecInstitucion").val() + "," + tipoPrograma,
+                function(data) {
+                    $("#tblProgramas").empty();
+                    $.each(data, function(i, item) {
+                        a++
+                        if (item.tipoProgramaEr == 1) {
+                            tipoProg = "Nuevo";
+                        } else if (item.tipoProgramaEr == 2) {
+                            tipoProg = "Reformulado";
+                        } else if (item.tipoProgramaEr == 3) {
+                            tipoProg = "Programa social";
+                        } else if (item.tipoProgramaEr == 4) {
+                            tipoProg = "Iniciativa social";
+                        } else if (item.tipoProgramaEr == 5) {
+                            tipoProg = "Programa social 2";
+                        } else if (item.tipoProgramaEr == 6) {
+                            tipoProg = "Iniciativa social 2";
+                        }
+                        ficha = "";
+                        $("#tblProgramas").append(
+                        "<tr><td width='12.2%'>" + item.ministerio +"</td><td width='12%'>" + item.servicio + "</td><td width='8%'>" + tipoProg + "</td><td width='42%'><a href='#' onclick='validaProgramaAbierto(" + item.idPrograma + "," + item.año + "," + item.tipoProgramaEr + ");return false;'>" + item.nombre +
+                        "</a></td><td width='11.4%'>" + item.etapa + "<div id='progress" + item.idPrograma + "' title='" + item.porcentaje + "%'></div></td>" +
+                        ficha +
+                       "</tr>");
+                       $("#progress" + item.idPrograma).progressbar({ value:  + item.porcentaje });
+                       $("#progress" + item.idPrograma).css({ 'background': 'LightYellow' });
+                       $("#progress" + item.idPrograma).css({ 'height': '10px' });
+                       if (item.porcentaje < 100) $("#progress" + item.idPrograma + "> div").css({ 'background': 'Orange' }); else $("#progress" + item.idPrograma + "> div").css({ 'background': '#36C62F' });
+                });
+                if (a==0) $("#tblProgramas").append("<tr><td colspan='4'><div  align='center'>No se han encontrado Registros para el filtro seleccionado</div></td></tr>");
+            });
+        }
+        //Valida si programa se encuentra tomado por otra persona
+        function validaProgramaAbierto(idPrograma, ano, tipo) {
+            $.get("@Url.Action("validaSession","FormularioVigente2")",
+                function(data2) {
+                    if (data2 == "False"){
+                        var f = document.forms[0];
+                        f.action = "@Url.Action("Index","Login")";
+                        f.submit();
+                    }else{
+                        cargaPrograma(idPrograma, ano, tipo);
+                    }
+            });
+        }
+        //Funcion encargada de cargar el programa
+        function cargaPrograma(idPrograma, ano, tipo){
+            var parms = { data: [idPrograma, ano] };
+            $.ajax({
+                    type: "POST",
+                    traditional: true,
+                    url: "@Url.Action("validaProgAbierto")",
+                    async: false,
+                    data: parms,
+                    dataType: "json",
+                    success: function(data) {
+                        var ruta;
+                        if (tipo == 1) {
+                            ruta = "@Url.Action("Index","FormularioNuevo")" + "?id=" +  idPrograma + '&ano=' + ano;
+                        } else if (tipo == 2) {
+                            ruta = "@Url.Action("Index","FormularioReformulado")" + "?listadoProgramasReformulados=&idPadre=0&ano=" + ano + '&idPrograma=' + idPrograma;
+                        } else if (tipo == 3) {
+                            ruta = "@Url.Action("Index","FormularioVigente2")" + "?id=" +  idPrograma + '&ano=' + ano;
+                        } else if (tipo == 4) {
+                            ruta = "@Url.Action("Index","FormularioIniciativa")" + "?id=" +  idPrograma + '&ano=' + ano;
+                        } else if (tipo == 5) {
+                            ruta = "@Url.Action("ProgramaSocial2","FormularioVigente2")" + "?id=" +  idPrograma + '&ano=' + ano;
+                        } else if (tipo == 6) {
+                            ruta = "@Url.Action("Iniciativa2","FormularioIniciativa")" + "?id=" +  idPrograma + '&ano=' + ano;
+                        }
+                        if (data.estado == true && data.usuario != data.usuarioLogeado && data.permisoGuardar == true){
+                            if (confirm("¿El programa esta siendo editado por el usuario: " + data.usuario + ", desea abrirlo de igual manera en modo solo lectura?")){
+                                var f = document.forms[0];
+                                f.action = ruta;
+                                f.submit();
+                            }
+                        }else{
+                            var f = document.forms[0];
+                            f.action = ruta;
+                            f.submit();
+                        }
+                    },
+                    error: function(data) {
+                        alert("Se ha producido un error al intentar abrir el programa");
+                    }
+            });
+        }
+        $(function(){
+            $('input').val($('input').attr('placeholder'));
+            $('input').on('focus',function(){
+                var i = $(this);
+                var placeholder = i.attr('placeholder');
+                if(placeholder == i.val()){
+                    i.val('').css('color','#CCC');
+                }else{
+                    i.css('color','#000');
+                }
+            }).blur(function(e) {
+                var i = $(this);
+                var placeholder = i.attr('placeholder');
+                if(i.val()=='' || i.val()==placeholder){
+                    i.val(placeholder).css('color','#CCC');;
+                }else{
+                    i.css('color','#000');
+                }
+            });
+        });
+        function filtrar(){
+            if (document.getElementById("anoPrograma").value == ""){
+                fecha = new Date();
+                var ano = fecha.getFullYear();
+                document.getElementById("anoPrograma").value = ano;
+            }
+            filtraAnos(document.getElementById("anoPrograma").value,$("#cmbTipoPrograma").val());
+        }
+        function limpiar() {
+            $("#selecInstitucion").empty();
+            $("#selecInstitucion").append("<option value='-1'>Seleccione servicio</option>");
+        }
+        function fillCombo(updateId, value) {
+            $.getJSON("@Url.Action("CmbServicios")" + "/" + value,
+                function(data) {
+                    $("#"+updateId).empty();
+                    $.each(data, function(i, item) {
+                        $("#"+updateId).append("<option value='" + item.programa +"'>" + item.descripcion + "</option>");
+                });
+            });
+        }
+        //ELIMINA PROGRAMA
+        function eliminaPrograma(id, ano) {
+            var f = document.forms[0];
+            if (confirm("¿Esta seguro que desea eliminar este programa?")) {
+                $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("eliminaPrograma")",
+                    data: { programa: id + "," + ano }
+                }).done(function(msg) {
+                    if (msg == "True") {
+                        location.href = "@Url.Content("~/Programa/Index")";
+                    } else {
+                        alert("Se ha producido un error al tratar de eliminar el programa");
+                    }
+                });
+            }
+        }
+        //Cierra sesion automaticamente
+        function cerraSesionAuto(){
+            var f = document.forms[0];
+            f.action = ROOT + "Programa/cierraSession";
+            f.submit();
+        }
+        //Valida sesion
+        window.setInterval("cerraSesionAuto()",1260000); //21 Minutos
+        //Muestra mensajes
+        function mensajes(mensaje) {
+            $("#lblMensajes").text("");
+            $("#lblMensajes").text(mensaje);
+            $("#dialogos").dialog({ modal: true, buttons: { Aceptar: function () { $(this).dialog("close"); } } });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+﻿@using SistemasBIPS.Models
+@model AccesoRestringido
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Ministerio de Desarrollo Social - Gobierno de Chile";
+}
+@section styles {
+    @Styles.Render("~/Content/Fonts_min") 
+}
+<div id="page-wrapper">
+    <div class="row">
+        <div class="col-lg-12 anti-padding-RL">
+            <h1 class="page-header" style="margin-top:10px"><small>@Model.Vista</small></h1>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-12 anti-padding-RL" style="margin-bottom:20px;">            
+            <div class="jumbotron">
+                <h2 class="text-center">Acceso restringido</h2>
+                <p class="text-center"><i class="fa fa-lock fa-4x" aria-hidden="true"></i></p>
+            </div>
+        </div>
+    </div>
+</div>
+

@@ -1,0 +1,100 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Sistema de Evaluación y Monitoreo SES-DIPRES">
+    <meta name="author" content="Ministerio de Desarrollo Social y Familia">
+    <link href=@Url.Content("~/Content/Images/favicon.ico") rel="shortcut icon" type="image/x-icon" />
+    <title>Ministerio de Desarrollo Social y Familia - Gobierno de Chile</title>
+    @Styles.Render("~/Content/Bootstrap_min")
+    @Styles.Render("~/Content/MetisMenu_min")
+    @Styles.Render("~/Content/APP")
+    @Styles.Render("~/Content/Sitio")
+    @Scripts.Render("~/bundles/modernizr")
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+</head>
+<body>
+    <div id="wrapper">
+        <div id="page-wrapper3">
+            <header>
+                <div class="wrap">
+                    <div class="bicolor"><span class="blue"></span><span class="red"></span></div>
+                    <h2 class="blue" style="margin-top: 10px;">Sistema de Evaluación y Monitoreo <strong>SES-DIPRES</strong></h2>
+                    <div class="bicolor2"><span class="blue"></span><span class="red"></span></div>
+                </div>
+            </header>
+        </div>
+        <div id="content" style="margin-top: 15px;">
+            <div class="wrap">
+                <div class="row" style="margin-left: 25px;">
+                    <div class="col-sm-6 col-md-6">
+                        <div class="thumbnail homeIngreso">
+                            <img src="~/Content/Images/logoMDS.png" alt="Ministerio de Desarrollo Social y Familia" width="140" style="height: 120px;" />
+                            <div class="caption">
+                                <h3 style="margin-bottom: 0px;">Ministerio de Desarrollo Social y Familia</h3>
+                                <h3 style="margin-top: 0px;"><small>Subsecretaria de Evaluación Social</small></h3>
+                                <p style="margin-top: 25px;">Si el programa que usted ingresará al proceso de Evaluación Ex Ante 2024 corresponde a un <b>"Programa Social"</b>, ingrese a la plataforma a través del siguiente link:</p>
+                                <p style="text-align: center; margin-top: 35px;"><a href="@Url.Action("Login","Login")" class="btn btn-primary" role="button" style="color: white;">Ingresar</a></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-md-6">
+                        <div class="thumbnail homeIngreso">
+                            <img src="~/Content/Images/logo_DIPRES.png" alt="Dirección de Presupuestos" width="140" style="height: 120px;" />
+                            <div class="caption">
+                                <h3 style="margin-bottom: 0px;">Ministerio de Hacienda</h3>
+                                <h3 style="margin-top: 0px;"><small>Dirección de Presupuestos</small></h3>
+                                <p style="margin-top: 25px;">Si el programa que usted ingresará al proceso de Evaluación Ex Ante 2024 corresponde a un <b>"Programa No Social"</b>, ingrese a la plataforma a través del siguiente link:</p>
+                                <p style="text-align: center; margin-top: 35px;"><a href="https://exante.dipres.gob.cl/2025/SPIMenuInterno.aspx" class="btn btn-primary" role="button" style="color: white;">Ingresar</a></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <footer class="footer2">
+            <div class="wrap">
+                <div class="bicolor"><span class="blue"></span><span class="red"></span></div>
+                <div class="top">
+                    <div class="listas">
+                        <div class="col-xs-6 col-sm-2" style="padding-left: 0px; margin-bottom: 1px;">
+                            <a href="http://www.desarrollosocialyfamilia.gob.cl/" target="_blank">
+                                <img src="~/Content/Images/logoMDS.png" alt="Ministerio de Desarrollo Social y Familia" width="120" />
+                            </a>
+                        </div>
+                        <div class="clearfix visible-xs-block"></div>
+                        <div class="col-xs-6 col-sm-2" style="padding-left: 0px;">
+                            <a href="http://www.dipres.gob.cl/598/w3-channel.html" target="_blank">
+                                <img src="~/Content/Images/logo_DIPRES.png" alt="Dirección de Presupuestos" width="120" />
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="bottom" style="padding-top:10px;">
+                    <div class="sep"></div>
+                    <div class="col-xs-12 col-sm-6 col-md-8" style="padding-left: 0px; padding-bottom: 10px;">
+                        <span>Subsecretaría de Evaluación Social - Dirección de Presupuestos - Gobierno de Chile</span>
+                    </div>
+                    <div class="col-xs-6 col-md-4" style="text-align: right; padding-right: 0px;">
+                        <span>v2.0</span>
+                    </div>
+                    <div class="clearfix visible-xs-block"></div>
+                </div>
+            </div>
+        </footer>
+    </div>
+    @Scripts.Render("~/bundles/Jquery_2_1_4")
+    @Scripts.Render("~/bundles/Boostrap")
+    @Scripts.Render("~/bundles/MetisMenu")
+    @Scripts.Render("~/bundles/SbAdmin")
+    @Scripts.Render("~/bundles/Countdown")
+    @Scripts.Render("~/bundles/TimerSesion")
+</body>
+</html>

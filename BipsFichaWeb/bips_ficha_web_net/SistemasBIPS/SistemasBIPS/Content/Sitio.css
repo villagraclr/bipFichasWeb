@@ -1,0 +1,29 @@
+﻿.row {
+    margin-right:0px;
+    margin-left:0px;
+}
+.anti-padding-RL {
+    padding-right:0px;
+    padding-left:0px;
+}
+#cargaPagina
+{
+  background: rgba( 206, 206, 206, 0.5 );
+  display: none;
+  height: 100%;
+  position: fixed;
+  width: 100%;
+  z-index: 9999;
+}
+#cargaPagina i
+{
+  left: 50%;
+  margin-left: -32px;
+  margin-top: -32px;
+  position: absolute;
+  top: 50%;
+}
+.count0{
+    background-color:#86939e;
+    border-color:#86939e;
+}

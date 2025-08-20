@@ -1,0 +1,762 @@
+﻿@using SistemasBIPS.Models
+@model FormulariosViewModels
+@{
+    ViewBag.Title = "Ministerio de Desarrollo Social y Familia - Gobierno de Chile";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section styles {
+    @Styles.Render("~/Content/Fonts_min")
+    @Styles.Render("~/Content/Formularios")
+}
+    <div id="page-wrapper">
+        <!--Cabecera-->
+        <div class="row">
+            <div class="col-md-14 bgceleste cabecera-form">
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="row">
+                            <h3 class="nombre"><strong>@Model.cabecera.nombre</strong></h3>
+                            @if (Model.programasEvaluar.Count(p => p.Value == Model.cabecera.idTipo) > 0)
+                            {
+                                if (!String.IsNullOrEmpty(Model.cabecera.version))
+                                {
+                                    if (int.Parse(Model.cabecera.version) > 1)
+                                    {
+                                        <strong>Versión: </strong> @Model.cabecera.version <br />
+                                    }
+                                }
+                            }                            
+                            <strong>Tipo: </strong> @Model.cabecera.tipo <br />
+                            <strong>Año: </strong> @Model.cabecera.ano <br />
+                            <strong>Modo: </strong> @Model.cabecera.modo <br />
+                            @if (!String.IsNullOrEmpty(Model.cabecera.fechaModificacion) && !String.IsNullOrEmpty(Model.cabecera.usuarioModificacion))
+                            {
+                                <strong>Última modificación:</strong> @Model.cabecera.fechaModificacion <strong>realizada por:</strong> @Model.cabecera.usuarioModificacion <br />
+                            }                            
+                            @if (Model.programasEvaluar.Count(p => p.Value == Model.cabecera.idTipo) > 0)
+                            {
+                                if (!String.IsNullOrEmpty(Model.cabecera.version) && !String.IsNullOrEmpty(Model.cabecera.fechaEnvio) && Model.cabecera.idEtapa == Model.constantes.GetValue("EtapaSolciEvalExAnte"))
+                                {
+                                    <strong>Fecha de envío: </strong> @Model.cabecera.fechaEnvio <br />
+                                }
+                            }                            
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="row">
+                            <div class="bloque-botones center-block">
+                                @if (Model.acceso.tipoAcceso == int.Parse(Model.constantes.GetValue("AccesoFormGuardado"))){
+                                    <button type="button" id="guardar" data-loading-text="Guardando..." class="btn btn-primary btn-block btn-guardado btn-guardado-bottom">Guardar</button>
+                                }else{
+                                    <button type="button" class="btn btn-danger btn-block btn-guardado btn-guardado-bottom" disabled="disabled">Solo lectura</button>
+                                }
+                                @using (Html.BeginForm("Salir", "Formulario", FormMethod.Post, new { id = "salirForm" }))
+                                {
+                                    @Html.AntiForgeryToken()                                    
+                                    <button type="button" id="btnSalir" class="btn btn-default btn-block btn-guardado btn-guardado-bottom">Salir</button>                                    
+                                }
+                                @if (Model.acceso.tipoAcceso == int.Parse(Model.constantes.GetValue("AccesoFormGuardado")))
+                                {
+                                    if (Model.programasEvaluar.Count(p => p.Value == Model.cabecera.idTipo) > 0){
+                                        <button type="button" id="btnEnviar" data-loading-text="Enviando..." class="btn btn-success btn-block btn-guardado">Enviar</button>
+                                    }
+                                }
+                                @if (!String.IsNullOrEmpty(Model.cabecera.version))
+                                {
+                                    if (int.Parse(Model.cabecera.version) >= 1 && Model.cabecera.idEtapa == Model.constantes.GetValue("EtapaSolciEvalExAnte") && Model.enviaObservaciones)
+                                    {
+                                        <button type="button" id="btnFinalizarRevision" class="btn btn-primary btn-block btn-guardado">Guardar revisión</button>
+                                    }
+                                }
+                                @if (Model.enviaEvaluar)
+                                {
+                                    if (Model.cabecera.idEtapa != Model.constantes.GetValue("EtapaEvaluacion"))
+                                    {
+                                        <button type="button" id="btnEnviarEvaluar" data-loading-text="Enviando..." class="btn btn-info btn-block btn-guardado">Evaluar</button>
+                                    }
+                                    else
+                                    {
+                                        <button type="button" id="btnGuardarEvaluacion" data-loading-text="Guardando..." class="btn btn-primary btn-block btn-guardado btn-guardado-bottom">Guardar evaluación</button>
+                                    }
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--Manejo de errores-->
+        <div id="divErrores" class="row" style="display:none;">
+            <div class="col-md-14 bgrojo cabecera-form">
+                <div class="row">
+                    <ul id="ulListaErrores"></ul>
+                </div>
+            </div>
+        </div>
+        <!--Formulario-->
+        @using (Html.BeginForm("Formulario", "Formulario", FormMethod.Post, new { @class = "form-horizontal", role = "form", id = "formularios", enctype = "multipart/form-data" }))
+        {
+            @Html.AntiForgeryToken()
+            <div class="tab-content">
+                @{ int indPreguntas = 0; int indObservaciones = 0; }
+                @foreach(var item in Model.menuPadres){
+        <div class="tab-pane fade @((Model.tab == item.IdMenu || Model.tab == 0 && item.Orden == 1 || Model.tab == 0 && item.Orden == Model.menuPadres.Min(p=>p.Orden)) ? "in active" : string.Empty)" id="tabForm@(item.Orden)">
+            <div class="row">
+                <ul class="nav nav-tabs" id="ulForm@(item.IdMenu)">
+                    @{ int activaTab = Model.menuHijos.Count(p => p.IdPadre == item.IdTipoMenu && ("tabHijos" + p.IdMenu.ToString()) == Model.tabForm); }
+                    @foreach (var hijo in Model.menuHijos.Where(p => p.IdPadre == item.IdTipoMenu)){
+                        <li role="presentation" id="tabHijos@(hijo.IdMenu)" @(activaTab > 0 ? (Model.tabForm == ("tabHijos" + hijo.IdMenu.ToString()) ? "class=active" : string.Empty) : (hijo.Orden == 1 || hijo.Orden == Model.menuHijos.Where(p => p.IdPadre == item.IdTipoMenu).Min(p=>p.Orden) ? "class=active" : string.Empty))><a href="#subNivel@(item.Orden.ToString() + hijo.Orden.ToString())" data-toggle="tab">@(hijo.TipoMenu)</a></li>
+                        }
+                </ul>
+                <div class="tab-content">
+                    @foreach (var hijo in Model.menuHijos.Where(p => p.IdPadre == item.IdTipoMenu)){
+                        <div class="tab-pane fade @(activaTab > 0 ? (Model.tabForm == ("tabHijos" + hijo.IdMenu.ToString()) ? "in active" : string.Empty) : (hijo.Orden == 1 || hijo.Orden == Model.menuHijos.Where(p => p.IdPadre == item.IdTipoMenu).Min(p=>p.Orden) ? "in active" : string.Empty))" id="subNivel@(item.Orden.ToString() + hijo.Orden.ToString())">
+                            <div class="col-lg-12 anti-padding-RL contenido-form">
+                                <div class="panel panel-default tab-sin-borde">
+                                    <div class="panel-body form-horizontal">
+                                        @if (Model.preguntas.Count > 0)
+                                        {
+                                            foreach (var preg in Model.preguntas.Where(p => p.menu == hijo.IdTipoMenu))
+                                            {
+                                                if (preg.tipoPregunta.IdParametro.ToString() == Model.constantes.GetValue("Titulo") || preg.tipoPregunta.IdParametro.ToString() == Model.constantes.GetValue("Titulo2"))
+                                                {
+                                                    string pregunta = preg.pregunta;
+                                                    string[] pregDinamica = (pregunta.IndexOf('#') > 0 ? pregunta.Split('#') : new string[] { });
+                                                    if (pregDinamica.Length > 0)
+                                                    {
+                                                        int anosDinamicos = 0;
+                                                        if (pregDinamica[1].IndexOf('-') > 0)
+                                                        {
+                                                            anosDinamicos = Model.cabecera.ano - int.Parse(pregDinamica[1].Split('-')[1]);
+                                                        }
+                                                        else if (pregDinamica[1].IndexOf('+') > 0)
+                                                        {
+                                                            anosDinamicos = Model.cabecera.ano + int.Parse(pregDinamica[1].Split('+')[1]);
+                                                        }
+                                                        else
+                                                        {
+                                                            anosDinamicos = Model.cabecera.ano;
+                                                        }
+                                                        pregunta = pregDinamica[0] + anosDinamicos.ToString() + pregDinamica[2];
+                                                    }
+                                                    IHtmlString preguntaHTML = new HtmlString(pregunta);
+                                                    <div id="divPreg@(preg.idPregunta.ToString())"><p class="@(preg.tipoPregunta.IdParametro.ToString() == Model.constantes.GetValue("Titulo") ? "bg-info" : "bg-primary")" style="padding:8px;font-size:12px;">@Html.Raw(preguntaHTML)</p></div>
+                                                }
+                                                else if (preg.tipoPregunta.IdParametro.ToString() == Model.constantes.GetValue("Tabla"))
+                                                {
+                                                    <div class="table-responsive" id="divPreg@(preg.idPregunta.ToString())">
+                                                        <table id="tabla@(preg.idPregunta)" class="table table-bordered">
+                                                            @if (preg.valor_funcion.Count > 0)
+                                                            {
+                                                                int filas = 0, columnas = 0;
+                                                                double cabeceras = 0;
+                                                                filas = (int)preg.valor_funcion.First().Valor;
+                                                                columnas = (int)preg.valor_funcion.First().Valor2;
+                                                                cabeceras = (double.Parse(preg.valor_funcion.First().Valor.ToString()) - (double)filas);
+                                                                cabeceras = (Math.Round(cabeceras, 1) != 0 ? double.Parse(Math.Round(cabeceras, 1).ToString().Split(',')[1]) : 0);
+                                                                filas = (filas - int.Parse(cabeceras.ToString()));
+                                                                if (cabeceras != 0)
+                                                                {
+                                                                    <thead>
+                                                                        @for (int f = 1; f <= int.Parse(cabeceras.ToString()); f++)
+                                                                        {
+                                                                            <tr style="text-align: center;">
+                                                                                @for (int c = 1; c <= columnas; c++)
+                                                                                {
+                                                                                    if (preg.preguntasGrupos.Count > 0)
+                                                                                    {
+                                                                                        var pregTabla = preg.preguntasGrupos.SingleOrDefault(p => p.fila == f && p.columna == c);
+                                                                                        if (pregTabla != null)
+                                                                                        {
+                                                                                            @Html.Partial("~/Views/Formulario/_PreguntasTablas.cshtml",
+                                                                                                new PreguntasFormulariosPartialView()
+                                                                                                {
+                                                                                                    id = pregTabla.id.ToString(),
+                                                                                                    indicePregunta = indPreguntas,
+                                                                                                    pregunta = pregTabla.pregunta,
+                                                                                                    respuesta = (Model.respuestas.Count(p => p.IdPregunta == pregTabla.id) > 0 ? Model.respuestas.FirstOrDefault(p => p.IdPregunta == pregTabla.id).Respuesta : string.Empty),
+                                                                                                    tipoPregunta = pregTabla.tipoPregunta.IdParametro.ToString(),
+                                                                                                    valorPregunta = pregTabla.tipoPregunta.Valor.ToString(),
+                                                                                                    valor2Pregunta = pregTabla.tipoPregunta.Valor2.ToString(),
+                                                                                                    categoriaPregunta = pregTabla.tipoPregunta.IdCategoria.ToString(),
+                                                                                                    valores = pregTabla.valores,
+                                                                                                    funcion = pregTabla.funcion,
+                                                                                                    valorFuncion = pregTabla.valor_funcion,
+                                                                                                    anoFormulario = Model.cabecera.ano,
+                                                                                                    idTabla = pregTabla.IdTabla.ToString(),
+                                                                                                    columna = pregTabla.columna.ToString(),
+                                                                                                    soloLectura = pregTabla.soloLectura
+                                                                                                })
+                                                                                            if (pregTabla.tipoPregunta.IdParametro.ToString() != Model.constantes.GetValue("Etiqueta") && pregTabla.tipoPregunta.IdParametro.ToString() != Model.constantes.GetValue("Anos") && pregTabla.tipoPregunta.IdParametro.ToString() != Model.constantes.GetValue("Vacio") && pregTabla.tipoPregunta.IdParametro.ToString() != Model.constantes.GetValue("EtiquetaEspejo"))
+                                                                                            {
+                                                                                                indPreguntas++;
+                                                                                            }
+                                                                                        }
+                                                                                    }
+                                                                                }
+                                                                            </tr>
+                                                                        }
+                                                                    </thead>
+                                                                }
+                                                                if (filas > 0)
+                                                                {
+                                                                    <tbody>
+                                                                        @for (int f = (int.Parse(cabeceras.ToString()) + 1); f <= (filas + cabeceras); f++)
+                                                                        {
+                                                                            <tr>
+                                                                                @for (int c = 1; c <= columnas; c++)
+                                                                                {
+                                                                                    if (preg.preguntasGrupos.Count > 0)
+                                                                                    {
+                                                                                        var pregTabla = preg.preguntasGrupos.SingleOrDefault(p => p.fila == f && p.columna == c);
+                                                                                        if (pregTabla != null)
+                                                                                        {
+                                                                                            @Html.Partial("~/Views/Formulario/_PreguntasTablas.cshtml",
+                                                                                            new PreguntasFormulariosPartialView()
+                                                                                            {
+                                                                                                id = pregTabla.id.ToString(),
+                                                                                                indicePregunta = indPreguntas,
+                                                                                                pregunta = pregTabla.pregunta,
+                                                                                                respuesta = (Model.respuestas.Count(p => p.IdPregunta == pregTabla.id) > 0 ? Model.respuestas.FirstOrDefault(p => p.IdPregunta == pregTabla.id).Respuesta : string.Empty),
+                                                                                                tipoPregunta = pregTabla.tipoPregunta.IdParametro.ToString(),
+                                                                                                valorPregunta = pregTabla.tipoPregunta.Valor.ToString(),
+                                                                                                valor2Pregunta = pregTabla.tipoPregunta.Valor2.ToString(),
+                                                                                                categoriaPregunta = pregTabla.tipoPregunta.IdCategoria.ToString(),
+                                                                                                valores = pregTabla.valores,
+                                                                                                funcion = pregTabla.funcion,
+                                                                                                valorFuncion = pregTabla.valor_funcion,
+                                                                                                anoFormulario = Model.cabecera.ano,
+                                                                                                idTabla = pregTabla.IdTabla.ToString(),
+                                                                                                columna = pregTabla.columna.ToString(),
+                                                                                                soloLectura = pregTabla.soloLectura
+                                                                                            })
+                                                                                            if (pregTabla.tipoPregunta.IdParametro.ToString() != Model.constantes.GetValue("Etiqueta") && pregTabla.tipoPregunta.IdParametro.ToString() != Model.constantes.GetValue("Anos") && pregTabla.tipoPregunta.IdParametro.ToString() != Model.constantes.GetValue("Vacio") && pregTabla.tipoPregunta.IdParametro.ToString() != Model.constantes.GetValue("EtiquetaEspejo"))
+                                                                                            {
+                                                                                                indPreguntas++;
+                                                                                            }
+                                                                                        }
+                                                                                    }
+                                                                                }
+                                                                            </tr>
+                                                                        }
+                                                                    </tbody>
+                                                                }
+                                                            }
+                                                        </table>
+                                                    </div>
+                                                }                                                
+                                                else
+                                                {
+                                                    string cssGrupoCheckPadres = preg.tipoPregunta.IdParametro.ToString() == Model.constantes.GetValue("GrupoCheckPadre") ? "margin-bottom: -38px;" : string.Empty;
+                                                    <div class="form-group form-group-sm" id="divPreg@(preg.idPregunta.ToString())" style="@cssGrupoCheckPadres">
+                                                        @if (preg.tipoPregunta.IdCategoria.ToString() == Model.constantes.GetValue("Tab") && preg.tipoPregunta.IdParametro.ToString() != Model.constantes.GetValue("TabEvaluacion"))
+                                                        {
+                                                            <div class="col-sm-12">
+                                                                <ul id="ultab@(preg.idPregunta.ToString())" class="nav nav-tabs">
+                                                                    @if (preg.valor_funcion.Count > 0)
+                                                                    {
+                                                                        for (decimal? x = preg.valor_funcion.First().Valor; x <= preg.valor_funcion.First().Valor2; x++)
+                                                                        {
+                                                                        <li role="presentation" @(x == 1 ? "class=active" : string.Empty)><a href="#tab@(preg.id.ToString() + x.ToString())" data-toggle="tab">@(preg.valores.Count(p => p.Orden == x) > 0 ? preg.valores.FirstOrDefault(p => p.Orden == x && p.IdParametro != p.IdCategoria).Descripcion : x.ToString())</a></li>
+                                                                        }
+                                                                    }
+                                                                </ul>
+                                                                <div id="tab@(preg.idPregunta.ToString())" class="tab-content">
+                                                                    @if (preg.valor_funcion.Count > 0)
+                                                                    {
+                                                                        for (decimal? x = preg.valor_funcion.First().Valor; x <= preg.valor_funcion.First().Valor2; x++)
+                                                                        {
+                                                                        <div class="tab-pane fade @(x == 1 ? "in active" : string.Empty)" id="tab@(preg.id.ToString() + x.ToString())">
+                                                                            <div class="panel panel-default tab-sin-borde">
+                                                                                <div class="panel-body form-horizontal">
+                                                                                    @if (preg.preguntasGrupos.Count > 0)
+                                                                                    {
+                                                                                        var listaPreguntas = (preg.tipoPregunta.IdParametro.ToString() == Model.constantes.GetValue("Tab") ? preg.preguntasGrupos : preg.preguntasGrupos.Where(p => p.valores.FirstOrDefault().Valor == x));
+                                                                                        foreach (var pregTab in listaPreguntas)
+                                                                                        {
+                                                                                            if (pregTab.tipoPregunta.IdParametro.ToString() == Model.constantes.GetValue("Tabla"))
+                                                                                            {
+                                                                                            <div class="table-responsive" id="divPregTab@(pregTab.idPregunta.ToString() + x.ToString())">
+                                                                                                <table id="tablaTab@(pregTab.idPregunta.ToString() + x.ToString())" class="table table-bordered">
+                                                                                                    @if (pregTab.valor_funcion.Count > 0)
+                                                                                                    {
+                                                                                                        int filas = 0, columnas = 0;
+                                                                                                        double cabeceras = 0;
+                                                                                                        filas = (int)pregTab.valor_funcion.First().Valor;
+                                                                                                        columnas = (int)pregTab.valor_funcion.First().Valor2;
+                                                                                                        cabeceras = (double.Parse(pregTab.valor_funcion.First().Valor.ToString()) - (double)filas);
+                                                                                                        cabeceras = (Math.Round(cabeceras, 1) != 0 ? double.Parse(Math.Round(cabeceras, 1).ToString().Split(',')[1]) : 0);
+                                                                                                        filas = (filas - int.Parse(cabeceras.ToString()));
+                                                                                                        if (cabeceras != 0)
+                                                                                                        {
+                                                                                                            <thead>
+                                                                                                                @for (int f = 1; f <= int.Parse(cabeceras.ToString()); f++)
+                                                                                                                {
+                                                                                                                    <tr style="text-align: center;">
+                                                                                                                            @for (int c = 1; c <= columnas; c++)
+                                                                                                                            {
+                                                                                                                                if (preg.preguntasTablas.Count > 0)
+                                                                                                                                {
+                                                                                                                                    var pregTabla = preg.preguntasTablas.SingleOrDefault(p => p.fila == f && p.columna == c && p.IdTabla == pregTab.idPregunta);
+                                                                                                                                    if (pregTabla != null)
+                                                                                                                                    {
+                                                                                                                                            @Html.Partial("~/Views/Formulario/_PreguntasTablas.cshtml",
+                                                                                                                                            new PreguntasFormulariosPartialView()
+                                                                                                                                            {
+                                                                                                                                                id = pregTabla.id.ToString(),
+                                                                                                                                                indicePregunta = indPreguntas,
+                                                                                                                                                pregunta = pregTabla.pregunta,
+                                                                                                                                                respuesta = (Model.respuestas.Count(p => p.IdPregunta == pregTabla.id && p.IdTab == x) > 0 ? Model.respuestas.FirstOrDefault(p => p.IdPregunta == pregTabla.id && p.IdTab == x).Respuesta : string.Empty),
+                                                                                                                                                tipoPregunta = pregTabla.tipoPregunta.IdParametro.ToString(),
+                                                                                                                                                valorPregunta = pregTabla.tipoPregunta.Valor.ToString(),
+                                                                                                                                                valor2Pregunta = pregTabla.tipoPregunta.Valor2.ToString(),
+                                                                                                                                                categoriaPregunta = pregTabla.tipoPregunta.IdCategoria.ToString(),
+                                                                                                                                                valores = pregTabla.valores,
+                                                                                                                                                funcion = pregTabla.funcion,
+                                                                                                                                                valorFuncion = pregTabla.valor_funcion,
+                                                                                                                                                anoFormulario = Model.cabecera.ano,
+                                                                                                                                                idTabla = pregTabla.IdTabla.ToString(),
+                                                                                                                                                columna = pregTabla.columna.ToString(),
+                                                                                                                                                idTab = x.ToString(),
+                                                                                                                                                soloLectura = pregTabla.soloLectura
+                                                                                                                                            })
+                                                                                                                                        if (pregTabla.tipoPregunta.IdParametro.ToString() != Model.constantes.GetValue("Etiqueta") && pregTabla.tipoPregunta.IdParametro.ToString() != Model.constantes.GetValue("Anos") && pregTabla.tipoPregunta.IdParametro.ToString() != Model.constantes.GetValue("Vacio") && pregTabla.tipoPregunta.IdParametro.ToString() != Model.constantes.GetValue("EtiquetaEspejo"))
+                                                                                                                                        {
+                                                                                                                                            indPreguntas++;
+                                                                                                                                        }
+                                                                                                                                    }
+                                                                                                                                }
+                                                                                                                            }
+                                                                                                                        </tr>
+                                                                                                                }
+                                                                                                            </thead>
+                                                                                                        }
+                                                                                                        if (filas > 0)
+                                                                                                        {
+                                                                                                            <tbody>
+                                                                                                                @for (int f = (int.Parse(cabeceras.ToString()) + 1); f <= (filas + cabeceras); f++)
+                                                                                                                {
+                                                                                                                    <tr>
+                                                                                                                            @for (int c = 1; c <= columnas; c++)
+                                                                                                                            {
+                                                                                                                                if (preg.preguntasGrupos.Count > 0)
+                                                                                                                                {
+                                                                                                                                    var pregTabla = preg.preguntasTablas.SingleOrDefault(p => p.fila == f && p.columna == c && p.IdTabla == pregTab.idPregunta);
+                                                                                                                                    if (pregTabla != null)
+                                                                                                                                    {
+                                                                                                                                            @Html.Partial("~/Views/Formulario/_PreguntasTablas.cshtml",
+                                                                                                                                            new PreguntasFormulariosPartialView()
+                                                                                                                                            {
+                                                                                                                                                id = pregTabla.id.ToString(),
+                                                                                                                                                indicePregunta = indPreguntas,
+                                                                                                                                                pregunta = pregTabla.pregunta,
+                                                                                                                                                respuesta = (Model.respuestas.Count(p => p.IdPregunta == pregTabla.id && p.IdTab == x) > 0 ? Model.respuestas.FirstOrDefault(p => p.IdPregunta == pregTabla.id && p.IdTab == x).Respuesta : string.Empty),
+                                                                                                                                                tipoPregunta = pregTabla.tipoPregunta.IdParametro.ToString(),
+                                                                                                                                                valorPregunta = pregTabla.tipoPregunta.Valor.ToString(),
+                                                                                                                                                valor2Pregunta = pregTabla.tipoPregunta.Valor2.ToString(),
+                                                                                                                                                categoriaPregunta = pregTabla.tipoPregunta.IdCategoria.ToString(),
+                                                                                                                                                valores = pregTabla.valores,
+                                                                                                                                                funcion = pregTabla.funcion,
+                                                                                                                                                valorFuncion = pregTabla.valor_funcion,
+                                                                                                                                                anoFormulario = Model.cabecera.ano,
+                                                                                                                                                idTabla = pregTabla.IdTabla.ToString(),
+                                                                                                                                                columna = pregTabla.columna.ToString(),
+                                                                                                                                                idTab = x.ToString(),
+                                                                                                                                                soloLectura = pregTabla.soloLectura
+                                                                                                                                            })
+                                                                                                                                        if (pregTabla.tipoPregunta.IdParametro.ToString() != Model.constantes.GetValue("Etiqueta") && pregTabla.tipoPregunta.IdParametro.ToString() != Model.constantes.GetValue("Anos") && pregTabla.tipoPregunta.IdParametro.ToString() != Model.constantes.GetValue("Vacio") && pregTabla.tipoPregunta.IdParametro.ToString() != Model.constantes.GetValue("EtiquetaEspejo"))
+                                                                                                                                        {
+                                                                                                                                            indPreguntas++;
+                                                                                                                                        }
+                                                                                                                                    }
+                                                                                                                                }
+                                                                                                                            }
+                                                                                                                        </tr>
+                                                                                                                }
+                                                                                                            </tbody>
+                                                                                                        }
+                                                                                                    }
+                                                                                                </table>
+                                                                                            </div>
+                                                                                            }else if (pregTab.tipoPregunta.IdParametro.ToString() == Model.constantes.GetValue("Titulo")){
+                                                                                                    string pregunta = pregTab.pregunta;
+                                                                                                    string[] pregDinamica = (pregunta.IndexOf('#') > 0 ? pregunta.Split('#') : new string[] { });
+                                                                                                    if (pregDinamica.Length > 0)
+                                                                                                    {
+                                                                                                        int anosDinamicos = 0;
+                                                                                                        if (pregDinamica[1].IndexOf('-') > 0)
+                                                                                                        {
+                                                                                                            anosDinamicos = Model.cabecera.ano - int.Parse(pregDinamica[1].Split('-')[1]);
+                                                                                                        }
+                                                                                                        else if (pregDinamica[1].IndexOf('+') > 0)
+                                                                                                        {
+                                                                                                            anosDinamicos = Model.cabecera.ano + int.Parse(pregDinamica[1].Split('+')[1]);
+                                                                                                        }
+                                                                                                        else
+                                                                                                        {
+                                                                                                            anosDinamicos = Model.cabecera.ano;
+                                                                                                        }
+                                                                                                        pregunta = pregDinamica[0] + anosDinamicos.ToString() + pregDinamica[2];
+                                                                                                    }
+                                                                                                    IHtmlString preguntaHTML = new HtmlString(pregunta);
+                                                                                                    <div id="divPreg@(pregTab.idPregunta.ToString())"><p class="bg-info" style="padding:8px;font-size:12px;">@Html.Raw(preguntaHTML)</p></div>
+                                                                                            }
+                                                                                            else if (pregTab.tipoPregunta.IdCategoria.ToString() == Model.constantes.GetValue("Tab"))
+                                                                                            {
+                                                                                                @Html.Partial("~/Views/Formulario/_Asignaciones.cshtml",
+                                                                                                    new AsignacionesFormulariosPartialView()
+                                                                                                    {
+                                                                                                        id = (pregTab.idPregunta.ToString() + x.ToString()),
+                                                                                                        idPregunta = pregTab.idPregunta.ToString(),
+                                                                                                        indicePregunta = indPreguntas,
+                                                                                                        idTab = x.ToString(),
+                                                                                                        pregunta = pregTab.pregunta,
+                                                                                                        respuestas = Model.respuestas,
+                                                                                                        tipoPregunta = pregTab.tipoPregunta.IdParametro.ToString(),
+                                                                                                        valorPregunta = pregTab.tipoPregunta.Valor.ToString(),
+                                                                                                        valor2Pregunta = pregTab.tipoPregunta.Valor2.ToString(),
+                                                                                                        categoriaPregunta = pregTab.tipoPregunta.IdCategoria.ToString(),                                                                                                            
+                                                                                                        anoFormulario = Model.cabecera.ano,
+                                                                                                        soloLectura = pregTab.soloLectura,
+                                                                                                        excepcionesPreguntas = Model.excepcionesPreguntas
+                                                                                                    })
+                                                                                                indPreguntas = indPreguntas + (pregTab.idPregunta == 6859 ? 138 : 237);
+                                                                                            } else {
+                                                                                                <div class="form-group form-group-sm" id="divPregTab@(pregTab.idPregunta.ToString() + x.ToString())">
+                                                                                                    @Html.Partial("~/Views/Formulario/_Preguntas.cshtml",
+                                                                                                    new PreguntasFormulariosPartialView()
+                                                                                                    {
+                                                                                                        id = (pregTab.idPregunta.ToString() + x.ToString()),
+                                                                                                                idPregunta = pregTab.idPregunta.ToString(),
+                                                                                                                indicePregunta = indPreguntas,
+                                                                                                                idTab = x.ToString(),
+                                                                                                                pregunta = pregTab.pregunta,
+                                                                                                                respuesta = (Model.respuestas.Count(p => p.IdPregunta == pregTab.idPregunta && p.IdTab == x) > 0 ? Model.respuestas.FirstOrDefault(p => p.IdPregunta == pregTab.idPregunta && p.IdTab == x).Respuesta : string.Empty),
+                                                                                                                tipoPregunta = pregTab.tipoPregunta.IdParametro.ToString(),
+                                                                                                                valorPregunta = pregTab.tipoPregunta.Valor.ToString(),
+                                                                                                                valor2Pregunta = pregTab.tipoPregunta.Valor2.ToString(),
+                                                                                                                categoriaPregunta = pregTab.tipoPregunta.IdCategoria.ToString(),
+                                                                                                                valores = pregTab.valores,
+                                                                                                                funcion = pregTab.funcion,
+                                                                                                                valorFuncion = pregTab.valor_funcion,
+                                                                                                                anoFormulario = Model.cabecera.ano,
+                                                                                                                soloLectura = pregTab.soloLectura
+                                                                                                            })
+                                                                                                 </div>                                                                                                
+                                                                                            }
+                                                                                            if (pregTab.tipoPregunta.IdParametro.ToString() != Model.constantes.GetValue("Tabla") && preg.tipoPregunta.IdParametro.ToString() != Model.constantes.GetValue("GrupoCheckPadre"))
+                                                                                            {
+                                                                                                indPreguntas++;
+                                                                                            }
+                                                                                        }
+                                                                                    }
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                        }
+                                                                    }
+                                                                </div>
+                                                            </div>
+                                                        }
+                                                        else if (preg.tipoPregunta.IdParametro.ToString() == Model.constantes.GetValue("TabEvaluacion"))
+                                                        {
+                                                               @Html.Partial("~/Views/Formulario/_Evaluaciones.cshtml", new EvaluacionesFormulariosPartialView()
+                                                               {
+                                                                   id = preg.id.ToString(),
+                                                                   idPregunta = preg.idPregunta.ToString(),
+                                                                   valores = preg.valores,
+                                                                   valor_funcion = preg.valor_funcion,
+                                                                   preguntasGrupos = preg.preguntasGrupos,
+                                                                   cabecera = Model.cabecera,
+                                                                   respuestas = Model.respuestas
+                                                               })
+                                                        }
+                                                        else
+                                                        {
+                                                            @Html.Partial("~/Views/Formulario/_Preguntas.cshtml",
+                                                            new PreguntasFormulariosPartialView()
+                                                            {
+                                                                id = preg.idPregunta.ToString(),
+                                                                idPregunta = preg.idPregunta.ToString(),
+                                                                indicePregunta = indPreguntas,
+                                                                pregunta = preg.pregunta,
+                                                                respuesta = (Model.respuestas.Count(p => p.IdPregunta == preg.idPregunta) > 0 ? Model.respuestas.FirstOrDefault(p => p.IdPregunta == preg.idPregunta).Respuesta : string.Empty),
+                                                                tipoPregunta = preg.tipoPregunta.IdParametro.ToString(),
+                                                                valorPregunta = preg.tipoPregunta.Valor.ToString(),
+                                                                valor2Pregunta = preg.tipoPregunta.Valor2.ToString(),
+                                                                categoriaPregunta = preg.tipoPregunta.IdCategoria.ToString(),
+                                                                valores = preg.valores,
+                                                                funcion = preg.funcion,
+                                                                valorFuncion = preg.valor_funcion,
+                                                                anoFormulario = Model.cabecera.ano,
+                                                                soloLectura = preg.soloLectura
+                                                            })                                                            
+                                                        }
+                                                    </div>
+                                                }
+                                                if (preg.tipoPregunta.IdCategoria.ToString() != Model.constantes.GetValue("Tab") && preg.tipoPregunta.IdParametro.ToString() != Model.constantes.GetValue("Titulo") && preg.tipoPregunta.IdParametro.ToString() != Model.constantes.GetValue("Tabla") && preg.tipoPregunta.IdParametro.ToString() != Model.constantes.GetValue("GrupoCheckPadre"))
+                                                {
+                                                    indPreguntas++;
+                                                }
+                                            }
+                                        }
+                                        @if (!String.IsNullOrEmpty(Model.cabecera.version) && Model.menuSinRevision.Count(p => p.Valor == hijo.IdMenu) == 0){                                            
+                                            if ((int.Parse(Model.cabecera.version) >= 1 && Model.cabecera.idEtapa == Model.constantes.GetValue("EtapaSolciEvalExAnte")) || int.Parse(Model.cabecera.version) > 1)
+                                            {
+                                                bool lectura = (int.Parse(Model.cabecera.version) >= 1 ? (Model.cabecera.idEtapa == Model.constantes.GetValue("EtapaSolciEvalExAnte") ? false : (int.Parse(Model.cabecera.version) > 1 && Model.cabecera.idEtapa != Model.constantes.GetValue("EtapaSolciEvalExAnte") ? true : false)) : true);
+                                                <div class="form-group form-group-sm">
+                                                    <div class="col-sm-4">
+                                                        <input type="hidden" name="model.observaciones[@indObservaciones].IdPregunta" value="@Model.constantes.GetValue("PreguntaCmbObservMonitoreo")" />
+                                                        <input type="hidden" id="cmbObsTab@(hijo.IdMenu)" name="model.observaciones[@indObservaciones].IdTab" value="@hijo.IdMenu" />
+                                                        <select id="cmbObs@(hijo.IdMenu)" name="model.observaciones[@indObservaciones].Respuesta" class="form-control input-sm" style="width:50%; margin-left:50%" @(lectura ? "disabled" : "")>
+                                                            <option value="1" @(Model.respuestas.Count(p => p.IdPregunta == decimal.Parse(Model.constantes.GetValue("PreguntaCmbObservMonitoreo")) && p.IdTab == hijo.IdMenu) > 0 ? (int.Parse(Model.respuestas.FirstOrDefault(p => p.IdPregunta == decimal.Parse(Model.constantes.GetValue("PreguntaCmbObservMonitoreo")) && p.IdTab == hijo.IdMenu).Respuesta.ToString()) == 1 ? "selected=selected" : string.Empty) : string.Empty)>En revisión</option>
+                                                            <option value="2" @(Model.respuestas.Count(p=>p.IdPregunta==decimal.Parse(Model.constantes.GetValue("PreguntaCmbObservMonitoreo")) && p.IdTab == hijo.IdMenu) > 0 ? (int.Parse(Model.respuestas.FirstOrDefault(p=>p.IdPregunta==decimal.Parse(Model.constantes.GetValue("PreguntaCmbObservMonitoreo")) && p.IdTab == hijo.IdMenu).Respuesta.ToString())==2 ? "selected=selected" : string.Empty) : string.Empty)>Sin información</option>
+                                                            <option value="3" @(Model.respuestas.Count(p=>p.IdPregunta==decimal.Parse(Model.constantes.GetValue("PreguntaCmbObservMonitoreo")) && p.IdTab == hijo.IdMenu) > 0 ? (int.Parse(Model.respuestas.FirstOrDefault(p=>p.IdPregunta==decimal.Parse(Model.constantes.GetValue("PreguntaCmbObservMonitoreo")) && p.IdTab == hijo.IdMenu).Respuesta.ToString())==3 ? "selected=selected" : string.Empty) : string.Empty)>Con observaciones</option>
+                                                            <option value="4" @(Model.respuestas.Count(p=>p.IdPregunta==decimal.Parse(Model.constantes.GetValue("PreguntaCmbObservMonitoreo")) && p.IdTab == hijo.IdMenu) > 0 ? (int.Parse(Model.respuestas.FirstOrDefault(p=>p.IdPregunta==decimal.Parse(Model.constantes.GetValue("PreguntaCmbObservMonitoreo")) && p.IdTab == hijo.IdMenu).Respuesta.ToString())==4 ? "selected=selected" : string.Empty) : string.Empty)>Sin observaciones</option>
+                                                        </select>
+                                                    </div>
+                                                    @{ indObservaciones++; }
+                                                    <div class="col-sm-6">
+                                                        <input type="hidden" name="model.observaciones[@indObservaciones].IdPregunta" value="@Model.constantes.GetValue("PreguntaObservMonitoreo")" />
+                                                        <input type="hidden" id="txtObsTab@(hijo.IdMenu)" name="model.observaciones[@indObservaciones].IdTab" value="@hijo.IdMenu" />
+                                                        <textarea class="form-control" rows="5" placeholder="Ingrese observación" name="model.observaciones[@indObservaciones].Respuesta" @(lectura ? "readonly" : "")>@(Model.respuestas.Count(p=>p.IdPregunta==decimal.Parse(Model.constantes.GetValue("PreguntaObservMonitoreo")) && p.IdTab == hijo.IdMenu) > 0 ? Model.respuestas.FirstOrDefault(p=>p.IdPregunta== decimal.Parse(Model.constantes.GetValue("PreguntaObservMonitoreo")) && p.IdTab == hijo.IdMenu).Respuesta : string.Empty)</textarea>
+                                                    </div>
+                                                    @{ indObservaciones++; }
+                                                </div>                                                
+                                            }
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+        }
+            </div>
+        }
+    </div>
+    <!--Modal mensajes salir-->
+    <div id="modalMensajesSalir" class="modal fade" tabindex="-1" role="dialog">
+      <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">Información</h4>
+          </div>
+          <div class="modal-body">
+              <p>Los datos que no se han guardado se perderán.<br /> ¿Confirma que desea continuar?</p>
+          </div>
+          <div class="modal-footer">
+              <button id="btnMensjCancelar" type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+              <button id="btnMensjAceptar" type="button" class="btn btn-primary">Aceptar</button>              
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+    <!--Modal mensajes enviar-->
+    <div id="modalMensajesEnviar" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog">
+        <div class="modal-dialog" style="width:400px;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Advertencia</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-danger" role="alert">
+                        @Html.Raw(new HtmlString(Model.textoEnviarEvaluar))
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="btnMsjEnviarCancel" type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                    <button id="btnMsjEnviarAcep" type="button" data-loading-text="Enviando..." class="btn btn-primary">Aceptar</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+    <!--Modal mensajes guardar revision-->
+    <div id="modalMensajeFinalizarRevision" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog">
+        <div class="modal-dialog" style="width:400px;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Guardar revisión</h4>
+                </div>
+                <div class="modal-body">
+                    <p>¿Qué desea hacer?</p>
+                </div>
+                <div class="modal-footer">
+                    <button id="btnMsjFinalizarRev" type="button" class="btn btn-success">Finalizar revisión</button>
+                    <button id="btnMsjGuardParcial" type="button" data-loading-text="Guardando..." class="btn btn-primary">Guardado parcial</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+    <!--Modal fin revision-->
+    <div id="modalFinRevision" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog">
+        <div class="modal-dialog" style="width:400px;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Finalizar revisión</h4>
+                </div>
+                <div class="modal-body">
+                    <p style="margin-bottom:5px;">Seleccione una opción: </p>
+                    <select id="cmbOpcObservaciones" class="form-control input-sm">
+                        <option value="-1">Seleccione...</option>
+                        <option value="1">Iterar con observaciones</option>
+                        <option value="2">Cerrar sin observaciones</option>
+                        <option value="3">Cerrar con observaciones</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button id="btnFinRevCancel" type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                    <button id="btnFinRevAcep" type="button" data-loading-text="Guardando..." class="btn btn-primary">Enviar</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div>
+    <!-- /.modal -->
+    <!--Modal mensajes-->
+    <div id="modalMensajesFormularios" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Información</h4>
+                </div>
+                <div class="modal-body" id="txtMensajesFormulario"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">Aceptar</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+    <!--Modal evaluar-->
+    <div id="modalMensajesEvaluar" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog">
+        <div class="modal-dialog" style="width:400px;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Advertencia</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-danger" role="alert">
+                        @Html.Raw(new HtmlString(Model.textoEvaluar))
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="btnMsjEvalCancel" type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                    <!--<button id="btnMsjEvalSave" type="button" data-loading-text="Enviando..." class="btn btn-primary">Guardar</button>-->
+                    <button id="btnMsjEvalAcep" type="button" data-loading-text="Enviando..." class="btn btn-info">Evaluar</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+    <!--Modal mensajes libera programa-->
+    <div id="modalMensajeLiberaProg" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Información</h4>
+                </div>
+                <div class="modal-body"><div id="txtMsjLiberaProg" class="alert alert-info" role="alert"></div></div>
+                <div class="modal-footer">
+                    <button id="btnLiberaProg" type="button" class="btn btn-primary" data-loading-text="Guardando..." data-dismiss="modal">Aceptar</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+    
+@section scripts {
+    <script src="~/Scripts/jquery.signalR-2.4.2.min.js"></script>
+    <script src="~/signalr/hubs"></script>
+    <script type="text/javascript">
+        var tipoAcceso = @Model.acceso.tipoAcceso;
+        var accesoFormGuardado = @int.Parse(Model.constantes.GetValue("AccesoFormGuardado"));
+        var tab = @Model.tab;
+        var btnEnviarEval = 0;
+        var btnEnviarObs = 0;
+        var menuPadres = [];
+        @if (Model.menuPadres.Count > 0){
+            foreach(var menu in Model.menuPadres){
+                <text>
+        var m = {};
+        m.IdMenu = @menu.IdMenu;
+        m.Orden = @menu.Orden;
+        m.TipoMenu = "@menu.TipoMenu";
+        menuPadres.push(m);
+        </text>
+            }
+        }
+        var funciones = [];
+        var respuestas = [];
+        @if (Model.respuestas.Count > 0){
+            foreach(var respuesta in Model.respuestas){
+                <text>
+        var r = {};
+        r.IdPregunta = @respuesta.IdPregunta.ToString();
+        r.IdTab = "@respuesta.IdTab";
+        r.Respuesta = '@respuesta.Respuesta.ToString().Trim().Replace("\r\n", "\n").Replace("\n", "<br />")';
+        respuestas.push(r);
+        </text>
+            }
+        }
+        var preguntasEval = [];
+        @if (Model.preguntasEvaluacion.Count > 0)
+        {
+            foreach(var preg in Model.preguntasEvaluacion)
+            {
+                <text>
+        var p = {};
+        p.IdParametro = @preg.IdParametro;
+            p.idCategoria = @preg.IdCategoria;
+        p.IdPreguntaDesc = "@preg.Descripcion";
+        p.IdPregunta = "@preg.Valor";
+        p.IdTab = "@preg.Valor2";
+        preguntasEval.push(p);
+                </text>
+            }
+        }
+        $(document).ready(function () {
+            var idProg = @Model.idProgramaBota;
+            var notificacion = $.connection.notificacionesHub;
+            notificacion.client.liberar = function (idPrograma) {
+                if (idPrograma == idProg && tipoAcceso == accesoFormGuardado){
+                    $("#txtMsjLiberaProg").empty();
+                    $("#txtMsjLiberaProg").html("<p>Por solicitud del administrador, se ha liberado este programa. Los cambios realizados serán guardados.</p>");
+                    $('#modalMensajeLiberaProg').modal('show');
+                    /*var opciones = {
+                        url: ROOT + "Formulario/LiberaPrograma",
+                        data: { _id: idPrograma },
+                        type: "post",
+                        datatype: "json",
+                        beforeSend: function () { $("#cargaPagina").fadeIn(); },
+                        success: function (result, xhr, status) {
+                            if (result == "ok") {
+                                $("#txtMsjLiberaProg").empty();
+                                $("#txtMsjLiberaProg").html("<p>Por solicitud del administrador, se ha liberado este programa. Los cambios realizados serán guardados.</p>");
+                                $('#modalMensajeLiberaProg').modal('show');
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            console.log(error);
+                        },
+                        complete: function () { $("#cargaPagina").fadeOut(); }
+                    };
+                    $.ajax(opciones);*/
+                }                  
+            };
+            $.connection.hub.start();
+            $("#btnLiberaProg").click(function () {
+                $("#btnLiberaProg").button('loading');
+                btnEnviarObs = 5;
+                $("#formularios").submit();
+            });
+        });
+    </script>
+    @Scripts.Render("~/bundles/Formularios")
+    @Scripts.Render("~/bundles/Funciones")
+}

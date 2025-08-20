@@ -1,0 +1,85 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
+    <link href=@Url.Content("~/Content/Images/favicon.ico") rel="shortcut icon" type="image/x-icon" />
+    <title>Sistema Carga BIPS - Ministerio de Desarrollo Social</title>    
+    @Styles.Render("~/Content/LoginCSS")
+    @Styles.Render("~/Content/JqueryUICSS")
+    @Scripts.Render("~/bundles/Jquery_1_7")
+    @Scripts.Render("~/bundles/JqueryUI")
+</head>
+<body>
+    @using (Html.BeginForm())
+    {
+        <!--Mensajes-->
+        <div id="dialogos" title="Información"><span id="lblMensajes"></span></div>
+        <input type="hidden" id="numPassErronea" value="0" />
+        <div id="header">
+            <div id="imgMDS">
+                <a class="logoMDS" href="http://www.ministeriodesarrollosocial.gob.cl/"></a>
+            </div>
+            <div id="tituloPrincipal">
+                <h1>Acceso a Sistema de Carga de Programas Sociales</h1>
+            </div>
+        </div>
+        <div id="login">
+            <div id="logeo">
+                <div class="error">
+                    <div id="divError" class="ui-state-error ui-corner-all" style="display:none">
+                        <p>
+                            <span class="ui-icon ui-icon-alert" style="float: left; margin-left:10px;"></span>
+                            <strong>Error:</strong><span id="msjError" style="margin-left:3px;"></span>
+                        </p>
+                    </div>
+                </div>
+                <div id="usuario">
+                    <span style="margin-left:55px">Usuario:</span>
+                    <input type="text" id="txtUsuario" name="txtUsuario" style="margin-left:30px; width:200px;" placeholder="usuario@mail.cl" />
+                </div>
+                <div class="contrasena">
+                    <span style="margin-left:30px">Contraseña:</span>
+                    <input type="password" id="txtPass" name="txtPass" style="margin-left:30px; width:200px;" placeholder="********" />
+                </div>
+                <div id="acceso">
+                    <input type="button" value="Ingresar" class="button2" name="btnLogin" onclick="login();" style="margin-left:160px;" />
+                </div>
+                <div id="perdidaPass">
+                    <a class="recuperaPass" onclick="perdidaPass();$(window).resize();">¿Ha olvidado su contraseña?</a>
+                </div>
+            </div>
+        </div>
+        <!--FOOTER-->
+        @Html.Partial("~/Views/Shared/_Footer.cshtml")
+        <!--POPUP RECUPERA CONTRASEÑA-->        
+        <div id="popUpRecuperaPass" style="display:none">
+            <div id="bodyRecuperaPass">
+                <span style="margin-left:30px">Ingrese mail:</span>
+                <input type="text" id="txtRecuperaPass" style="width:200px" placeholder="usuario@mail.cl" />
+            </div>
+            <div id="ErrorRecuperaPass" style="display:none">
+                <span class="ui-icon ui-icon-alert" style="float: left; margin-left:10px;"></span>
+                <strong>Error:</strong><span id="msjErrorRecupPass" style="margin-left:3px;"></span>
+            </div>
+        </div>
+    }    
+    @Scripts.Render("~/bundles/Rut")
+    @Scripts.Render("~/bundles/Util")
+    <script type="text/javascript">
+        var ROOT = "@Url.Content("~/")";
+        if (jQuery.browser.name == "Firefox"){ //&& parseInt(jQuery.browser.version) < 27){
+            //alert("Está utilizando una versión menor a la permitida por el sistema, favor de descargar la versión 27 o posterior, o utilice otro navegador.");
+            //alert("Está utilizando un navegador no permitido por el sistema, favor de utilizar otro. Se recomienda el uso de Google Chrome");
+            var doc = document.open("text/html","replace");
+            var texto = "<html><body><div style='text-align:center;margin-top:20%'><h4>Está utilizando un navegador no permitido por el sistema, favor de utilizar otro. Se recomienda el uso de Google Chrome.</h4></div></html></body>";
+            doc.write(texto);
+            doc.close();
+            window.stop();
+            //window.location.replace("http://www.programassociales.cl");
+        }        
+    </script>
+    @Scripts.Render("~/bundles/Login")
+</body>
+</html>

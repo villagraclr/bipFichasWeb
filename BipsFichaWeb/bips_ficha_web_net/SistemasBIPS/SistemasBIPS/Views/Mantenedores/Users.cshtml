@@ -1,0 +1,590 @@
+﻿@using SistemasBIPS.Models
+@model UsuariosViewModels
+@{ MDS.Core.Providers.IProviderConstante constantes = (MDS.Core.Providers.IProviderConstante)Activator.CreateInstance(typeof(MDS.Core.Providers.ProviderConstante)); }
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Ministerio de Desarrollo Social - Gobierno de Chile";
+}
+@section styles {
+    @Styles.Render("~/Content/Fonts_min")
+    @Styles.Render("~/Content/DataTable")
+}
+<div id="page-wrapper">
+    <div class="row">
+        <ol class="breadcrumb breadcrumbBIPS">
+            <li><a><i class="fa fa-gears fa-fw"></i> Mantenedores</a></li>
+            <li class="active"><i class="fa fa-users fa-fw"></i> Usuarios</li>
+        </ol>
+    </div>
+    <div class="row">                
+        <div class="col-lg-12" style="padding-left:0px;padding-right:0px">
+            <div class="table-responsive">
+                <table class="table table-striped table-bordered table-hover" cellspacing="0" id="tblUsuarios">
+                    <thead>
+                        <tr>
+                            <th>Usuario</th>
+                            <th>Nombre</th>
+                            <th>Ministerio</th>
+                            <th>Servicio</th>
+                            <th>Perfil</th>
+                            <th>Grupos</th>
+                            <th>Permisos</th>
+                            <th>Contraseña</th>
+                            <th>Eliminar</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<!--Modal nuevos usuarios-->
+<div id="modalNuevoUsers" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="modalTitleNuevoUser"></h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-horizontal">
+                    <input type="hidden" id="txtIdUser" value="" />
+                    <div class="form-group">
+                        <label for="txtEmail" class="col-sm-3 control-label" style="padding-left:0px; padding-right:0px;">Email (*)</label>
+                        <div class="col-sm-9" style="padding-left:15px;">
+                            <input type="text" class="form-control" id="txtEmail" placeholder="Ingrese email" style="width:95%;" />                            
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="txtNombre" class="col-sm-3 control-label" style="padding-left:0px; padding-right:0px;">Nombre (*)</label>
+                        <div class="col-sm-9" style="padding-left:15px;">
+                            <input type="text" class="form-control" id="txtNombre" placeholder="Ingrese nombre" style="width:95%;" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="cmbMinisterio" class="col-sm-3 control-label" style="padding-left:0px; padding-right:0px;">Ministerio (*)</label>
+                        <div class="col-sm-9" style="padding-left:15px;">
+                            <select id="cmbMinisterio" class="form-control cmbMinisterio" style="width:95%;">
+                                <option value="-1">Seleccione</option>
+                                @foreach (var m in Model.listaMinistServ)
+                                {
+                                    <option value="@m.Ministerios.IdParametro">@m.Ministerios.Descripcion</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="cmbServicio" class="col-sm-3 control-label" style="padding-left:0px; padding-right:0px;">Servicio (*)</label>
+                        <div class="col-sm-9" style="padding-left:15px;">
+                            <select id="cmbServicio" class="form-control cmbServicio" style="width:95%;">
+                                <option value="-1">Seleccione</option>
+                                @if (Model.dataUsuario.Servicio != 0)
+                                {
+                                    int idMinisterio = 0;
+                                    foreach (var s in Model.listaMinistServ)
+                                    {
+                                        foreach (var m in s.Servicios)
+                                        {
+                                            if (m.IdParametro == Model.dataUsuario.Servicio)
+                                            {
+                                                idMinisterio = int.Parse(m.Valor.ToString());
+                                                break;
+                                            }
+                                        }
+                                        if (idMinisterio != 0) { break; }
+                                    }
+                                    if (idMinisterio != 0)
+                                    {
+                                        foreach (var m in Model.listaMinistServ)
+                                        {
+                                            foreach (var s in m.Servicios.Where(p => p.Valor == idMinisterio))
+                                            {
+                                                <option value="@s.IdParametro">@s.Descripcion</option>
+                                            }
+                                        }
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="cmbPerfil" class="col-sm-3 control-label" style="padding-left:0px; padding-right:0px;">Perfil (*)</label>
+                        <div class="col-sm-9 input-group" style="padding-left:15px;width:69%;">
+                            <select id="cmbPerfil" class="form-control">
+                                <option value="-1">Seleccione</option>
+                                @if (Model.listaPerfiles.Count > 0)
+                                {
+                                    foreach (var p in Model.listaPerfiles)
+                                    {
+                                        <option value="@p.IdPerfil">@p.Nombre</option>
+                                    }
+                                }
+                            </select>
+                            <div class="input-group-btn">
+                                <button type="button" class="btn btn-default" aria-label="Help" id="btnVerPermisos"><span class="glyphicon glyphicon-question-sign"></span></button>
+                            </div>
+                        </div>
+                    </div>                    
+                </div>
+            </div>
+            <div class="modal-footer">                
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" data-loading-text="Guardando..." id="btnGuardaUser">Guardar</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!--Modal perfiles-->
+<div id="modalPerfiles" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="modalTitlePerm"></h4>
+            </div>
+            <div class="modal-body" style="height:450px;overflow-y:auto;">
+                <div class="table-responsive">
+                    <table class="table table-striped table-bordered table-hover" cellspacing="0" id="tblPermisos">
+                        <thead>
+                            <tr>
+                                <th>Permiso</th>
+                                <th>Descripción</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Aceptar</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!--Modal grupos-->
+<div id="modalGrupos" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="modalTitleGrupos">Grupos asignados</h4>
+            </div>
+            <div class="modal-body" style="height:450px;overflow-y:auto;">
+                <input type="hidden" value="" id="txtUserModel" />
+                <div class="table-responsive">
+                    <table class="table table-striped table-bordered table-hover" cellspacing="0" id="tblGrupos">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Descripción</th>
+                                <th>Tipo grupo</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Aceptar</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!--Modal grupos 2-->
+<div id="modalGrupos2" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Asignar Grupos</h4>
+            </div>
+            <div class="modal-body">                
+                <div class="table-responsive" style="height:500px;overflow-y:auto;">
+                    <table class="table table-striped table-bordered table-hover" cellspacing="0" id="tblGrupos2">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Descripción</th>
+                                <th>Tipo grupo</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" data-loading-text="Guardando..." id="btnGuardaGrupos">Guardar</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!--Modal permisos-->
+<div id="modalPermisos" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Permisos Asignados</h4>
+            </div>
+            <div class="modal-body" style="height:450px;overflow-y:auto;">
+                <input type="hidden" value="" id="txtUserPermisosModel" />
+                <div class="table-responsive">
+                    <table class="table table-striped table-bordered table-hover" cellspacing="0" id="tblPermisosUsers">
+                        <thead>
+                            <tr>
+                                <th>Año</th>
+                                <th>Ministerio</th>
+                                <th>Servicio</th>
+                                <th>Nombre</th>
+                                <th>Tipo</th>
+                                <th>Permiso</th>
+                                <th><a href="#" onclick="eliminaPermisosGral();" data-toggle="tooltip" data-placement="left" title="Eliminar permisos masivamente">Eliminar</a></th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Aceptar</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!--Modal permisos 2-->
+<div id="modalPermisos2" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Asignar Permisos</h4>
+            </div>
+            <div class="modal-body" style="height:450px;overflow-y:auto;">
+                <input type="hidden" value="" id="idTipoAgrePerm" />
+                <ul class="nav nav-tabs tipoAgregaPerm" role="tablist">
+                    <li role="presentation" class="active" id="liIndivAgrePerm"><a href="#individual" aria-controls="individual" role="tab" data-toggle="tab">Individual</a></li>
+                    <li role="presentation"><a href="#grupal" aria-controls="grupal" role="tab" data-toggle="tab">Grupal</a></li>
+                </ul>
+                <div class="tab-content">
+                    <div role="tabpanel" class="tab-pane active" id="individual" style="margin-top:10px;">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-bordered table-hover" cellspacing="0" id="tblPermisosUsers2">
+                                <thead>
+                                    <tr>
+                                        <th>Año</th>
+                                        <th>Ministerio</th>
+                                        <th>Servicio</th>
+                                        <th>Nombre</th>
+                                        <th>Tipo</th>
+                                        <th>Permiso</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div role="tabpanel" class="tab-pane" id="grupal" style="margin-top:10px;">
+                        <div class="form-horizontal">
+                            <div class="form-group">
+                                <label for="cmbAnoPermisos" class="col-sm-3 control-label" style="padding-left:0px; padding-right:0px;">Año</label>
+                                <div class="col-sm-9" style="padding-left:15px;">
+                                    <select id="cmbAnoPermisos" class="form-control" style="width:75%;">
+                                        <option value="-1">Seleccione</option>
+                                        @if (Model.listaAnos.Count > 0){
+                                            foreach (var ano in Model.listaAnos){
+                                                <option value="@ano">@ano</option>
+                                            }
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="cmbMinisterioPermisos" class="col-sm-3 control-label" style="padding-left:0px; padding-right:0px;">Ministerio</label>
+                                <div class="col-sm-9" style="padding-left:15px;">
+                                    <select id="cmbMinisterioPermisos" class="form-control cmbMinisterio" style="width:75%;">
+                                        <option value="-1">Seleccione</option>
+                                        @foreach (var m in Model.listaMinistServ){
+                                            <option value="@m.Ministerios.IdParametro">@m.Ministerios.Descripcion</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="cmbServicioPermisos" class="col-sm-3 control-label" style="padding-left:0px; padding-right:0px;">Servicio</label>
+                                <div class="col-sm-9" style="padding-left:15px;">
+                                    <select id="cmbServicioPermisos" class="form-control cmbServicio" style="width:75%;">
+                                        <option value="-1">Seleccione</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="cmbGrupoPermisos" class="col-sm-3 control-label" style="padding-left:0px; padding-right:0px;">Grupo</label>
+                                <div class="col-sm-9" style="padding-left:15px;">
+                                    <select id="cmbGrupoPermisos" class="form-control" style="width:75%;">
+                                        <option value="-1">Seleccione</option>                                        
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="cmbTipoPermisos" class="col-sm-3 control-label" style="padding-left:0px; padding-right:0px;">Tipo (*)</label>
+                                <div class="col-sm-9" style="padding-left:15px;">
+                                    <select id="cmbTipoPermisos" class="form-control agregaPermisoMasivo" style="width:75%;">
+                                        <option value="-1">Seleccione</option>
+                                        @foreach (var t in Model.tipos.Where(p => p.IdParametro != p.IdCategoria).ToList()){
+                                            <option value="@t.IdParametro">@t.Descripcion</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="cmbPermisoPerm" class="col-sm-3 control-label" style="padding-left:0px; padding-right:0px;">Permiso (*)</label>
+                                <div class="col-sm-9" style="padding-left:15px;">
+                                    <select id="cmbPermisoPerm" class="form-control agregaPermisoMasivo" style="width:75%;">
+                                        <option value="-1">Seleccione</option>                                        
+                                    </select>
+                                </div>                                
+                            </div>
+                        </div>
+                    </div>
+                </div>                
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" data-loading-text="Guardando..." id="btnGuardaPermisos">Guardar</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!--Modal descripcion permisos-->
+<div id="modalInforPerm" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header"><h4 class="modal-title">Descripción permiso</h4></div>
+            <div class="modal-body" id="msjInfoPerm"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Aceptar</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!--Modal eliminar general-->
+<div id="modalEliminarGeneral" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <input type="hidden" value="" id="txtIdEliminar" />
+            <input type="hidden" value="" id="txtTipoEliminar" />
+            <div class="modal-header"><h4 class="modal-title" id="tituloEliminarGnral"></h4></div>
+            <div class="modal-body" id="bodyEliminarGnral"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" data-loading-text="Eliminando..." id="btnElimGenral">Eliminar</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!--Modal elimina formularios permisos-->
+<div id="modalElimPermisosUsers" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Eliminar permisos</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-horizontal">
+                    <div class="form-group">
+                        <label for="cmbAnoElimPerm" class="col-sm-3 control-label" style="padding-left:0px; padding-right:0px;">Año</label>
+                        <div class="col-sm-9" style="padding-left:15px;">
+                            <select id="cmbAnoElimPerm" class="form-control elimPermUser" style="width:75%;">
+                                <option value="-1">Seleccione</option>
+                                @if (Model.listaAnos.Count > 0)
+                                {
+                                    foreach (var ano in Model.listaAnos)
+                                    {
+                                        <option value="@ano">@ano</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="cmbMinisterioElimPerm" class="col-sm-3 control-label" style="padding-left:0px; padding-right:0px;">Ministerio</label>
+                        <div class="col-sm-9" style="padding-left:15px;">
+                            <select id="cmbMinisterioElimPerm" class="form-control cmbMinisterio elimPermUser" style="width:75%;">
+                                <option value="-1">Seleccione</option>
+                                @foreach (var m in Model.listaMinistServ)
+                                {
+                                    <option value="@m.Ministerios.IdParametro">@m.Ministerios.Descripcion</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="cmbServicioElimPerm" class="col-sm-3 control-label" style="padding-left:0px; padding-right:0px;">Servicio</label>
+                        <div class="col-sm-9" style="padding-left:15px;">
+                            <select id="cmbServicioElimPerm" class="form-control cmbServicio elimPermUser" style="width:75%;">
+                                <option value="-1">Seleccione</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="cmbTipoElimPerm" class="col-sm-3 control-label" style="padding-left:0px; padding-right:0px;">Tipo</label>
+                        <div class="col-sm-9" style="padding-left:15px;">
+                            <select id="cmbTipoElimPerm" class="form-control elimPermUser" style="width:75%;">
+                                <option value="-1">Seleccione</option>
+                                @foreach (var t in Model.tipos.Where(p => p.IdParametro != p.IdCategoria).ToList())
+                                {
+                                    <option value="@t.IdParametro">@t.Descripcion</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="cmbPermiso" class="col-sm-3 control-label" style="padding-left:0px; padding-right:0px;">Permiso</label>
+                        <div class="col-sm-9" style="padding-left:15px;">
+                            <select id="cmbPlantillasElimPerm" class="form-control elimPermUser" style="width:75%;">
+                                <option value="-1">Seleccione</option>
+                                @foreach (var p in Model.plantillas){
+                                    <option value="@p.IdExcepcionPlantilla">@p.Nombre</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" data-loading-text="Eliminando..." id="btnElimUsersPerm">Eliminar</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!--Modal mensaje de confirmacion de accion-->
+<div id="modalMsjConfirm" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header"><h4 class="modal-title" id="tituloMsjConfirm"></h4></div>
+            <div class="modal-body" id="bodyMsjConfirm"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" data-loading-text="Guardando..." id="btnMsjConfirm">Aceptar</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!--Modal cambio pass-->
+<div id="modalCambioPass" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header"><h4 class="modal-title">Cambio de contraseña</h4></div>
+            <div class="modal-body">
+                <input type="hidden" id="txtIdUserCambioPass" value="" />
+                <button type="button" class="btn btn-primary btn-lg btn-block" data-loading-text="Enviando..." id="btnReenviarMail">Enviar email</button>
+                <button type="button" class="btn btn-default btn-lg btn-block" data-loading-text="Generando..." id="btnNuevaPass">Nueva contraseña</button>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!--Modal mensaje de confirmacion de accion-->
+<div id="modalMsjConfirm" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <input type="hidden" value="" id="txtTipoMsj" />
+            <div class="modal-header"><h4 class="modal-title" id="tituloMsjConfirm"></h4></div>
+            <div class="modal-body" id="bodyMsjConfirm"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" data-loading-text="Guardando..." id="btnMsjConfirm">Aceptar</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!--Modal mensajes-->
+<div id="modalMsjUsers" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header"><h4 class="modal-title">Información</h4></div>
+            <div class="modal-body" id="msjInfoUsers"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="btnAcepMsjUser" data-dismiss="modal">Aceptar</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+@section scripts {
+    @Scripts.Render("~/bundles/DataTable")
+    <script type="text/javascript">
+        var ROOT = "@Url.Content("~/")";
+        var perfil = @Model.dataUsuario.Perfil;
+        var aMinsServ = [];
+        @foreach (var m in Model.listaMinistServ)
+        {
+        <text>
+        var mi = {};
+        mi.IdParametro = @m.Ministerios.IdParametro;
+        var aServ = [];
+        @foreach (var s in m.Servicios)
+            {
+            <text>
+        var serv = {};
+        serv.IdParametro = @s.IdParametro;
+        serv.Descripcion = "@s.Descripcion";
+        aServ.push(serv);
+        </text>
+            }
+        mi.Servicios = aServ;
+        aMinsServ.push(mi);
+        </text>
+        }
+        var creaUsers = 0;
+        @if (Model.listaPermisosPerfiles.Count > 0){
+            if (Model.listaPermisosPerfiles.Count(p => p.IdPermiso == decimal.Parse(constantes.GetValue("PermisoNuevosUsuarios"))) > 0){
+                <text>creaUsers = 1;</text>
+            }
+        }
+        var asignaGrupoUsers = 0;
+        @if (Model.listaPermisosPerfiles.Count > 0){
+            if (Model.listaPermisosPerfiles.Count(p => p.IdPermiso == decimal.Parse(constantes.GetValue("PermisoAsignarGrupoUsers"))) > 0){
+                <text>asignaGrupoUsers = 1;</text>
+            }
+        }
+        var asignaPermisosUsers = 0;
+        @if (Model.listaPermisosPerfiles.Count > 0){
+            if (Model.listaPermisosPerfiles.Count(p => p.IdPermiso == decimal.Parse(constantes.GetValue("PermisoAsignarPermisosUsers"))) > 0){
+                <text>asignaPermisosUsers = 1;</text>
+            }
+        }
+        var aTiposGrupos = [];
+        @if (Model.tiposGrupos.Count > 0){
+            foreach (var tipo in Model.tiposGrupos){
+                if (tipo.IdParametro != tipo.IdCategoria){
+                    <text>
+                    var tg = {};
+                    tg.IdParametro = @tipo.IdParametro;
+                    tg.Descripcion = "@tipo.Descripcion";
+                    aTiposGrupos.push(tg);
+                    </text>
+                }
+            }
+        }
+        var aPlantillas = [];
+        @if (Model.plantillas.Count > 0){
+            foreach(var plantilla in Model.plantillas){
+                <text>
+                var p = {};
+                p.IdExcepcionPlantilla = @plantilla.IdExcepcionPlantilla;
+                p.Nombre = "@plantilla.Nombre";
+                p.TipoFormulario = @plantilla.TipoFormulario;
+                aPlantillas.push(p);
+                </text>
+            }
+        }
+    </script>
+    @Scripts.Render("~/bundles/Users")
+}

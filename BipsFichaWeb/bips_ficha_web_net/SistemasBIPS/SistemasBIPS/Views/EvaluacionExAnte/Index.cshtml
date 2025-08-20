@@ -1,0 +1,519 @@
+﻿@using SistemasBIPS.Models
+@model EvaluacionExAnteViewModels
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Ministerio de Desarrollo Social y Familia - Gobierno de Chile";
+}
+@section styles {
+    @Styles.Render("~/Content/Fonts_min")
+    @Styles.Render("~/Content/DataTable")
+}
+<div id="page-wrapper">
+    <div class="row">
+        <ol class="breadcrumb breadcrumbBIPS">
+            <li><a><i class="fa fa-folder-open-o fa-fw"></i> Ex-Ante</a></li>
+            <li class="active"><i class="fa fa-calendar-check-o fa-fw"></i> Evaluaciones Ex-Ante</li>
+        </ol>
+    </div>
+    <div class="row">
+        <div class="col-lg-12" style="padding-left:0px;padding-right:0px">
+            <div class="table-responsive">
+                <table class="table table-striped table-bordered table-hover" cellspacing="0" id="tblEvalExAnte">
+                    <thead>
+                        <tr>
+                            <th>Id</th>
+                            <th>Ministerio</th>
+                            <th>Servicio</th>
+                            <th>Nombre</th>
+                            <th>Versión</th>
+                            <th>Puntaje final</th>
+                            <th>Calificación</th>
+                            <th>Evaluador 1</th>
+                            <th>Evaluador 2</th>
+                            <th>Revisión Sectorialista</th>
+                            <th>Revisión Monitoreo</th>
+                            <th>Revisión Estudios</th>
+                            <th>Finalizar Evaluación</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<!--Modal evaluación-->
+<div id="modalEvaluacion" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Editar Evaluación</h4>
+            </div>
+            <div class="modal-body" style="height:450px;overflow-y:auto;">
+                <input type="hidden" id="txtIdProgramaEvaluacion" value="0" />
+                <div class="form-horizontal">
+                    <div class="form-group">
+                        <label for="cmbCalificacion" class="col-sm-3 control-label" style="padding-left:0px; padding-right:0px;">Calificación</label>
+                        <div class="col-sm-9" style="padding-left:15px;">
+                            <select id="cmbCalificacion" class="form-control" style="width:90%;">
+                                <option value="-1">Seleccione</option>
+                                @if (Model.listaCalificaciones.Count > 0)
+                                {
+                                    foreach (var item in Model.listaCalificaciones)
+                                    {
+                                        <option value="@item.IdParametro">@item.Descripcion</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="txtComentSegpres" class="col-sm-3 control-label" style="padding-left:0px; padding-right:0px;">Comentario SEGPRES</label>
+                        <div class="col-sm-9" style="padding-left:15px;">
+                            <textarea class="form-control validaEval" id="txtComentSegpres" rows="3" maxlength="8000" aria-describedby="txtCount14" placeholder="Ingrese comentario" style="width:90%;"></textarea>
+                            <span id="txtCount1" class="help-block" style="font-size:12px;">Caracteres restantes=8000</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="txtComentGeneral" class="col-sm-3 control-label" style="padding-left:0px; padding-right:0px;">Comentario General</label>
+                        <div class="col-sm-9" style="padding-left:15px;">
+                            <textarea class="form-control validaEval" id="txtComentGeneral" rows="3" placeholder="Ingrese comentario" style="width:90%;"></textarea>
+                            <span id="txtCount2" class="help-block" style="font-size:12px;">Caracteres restantes=8000</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="txtAtingencia" class="col-sm-3 control-label" style="padding-left:0px; padding-right:0px;">Atingencia</label>
+                        <div class="col-sm-9" style="padding-left:15px;">
+                            <textarea class="form-control validaEval" id="txtAtingencia" rows="3" placeholder="Ingrese texto" style="width:90%;"></textarea>
+                            <span id="txtCount3" class="help-block" style="font-size:12px;">Caracteres restantes=8000</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="txtCoherencia" class="col-sm-3 control-label" style="padding-left:0px; padding-right:0px;">Coherencia</label>
+                        <div class="col-sm-9" style="padding-left:15px;">
+                            <textarea class="form-control validaEval" id="txtCoherencia" rows="3" placeholder="Ingrese texto" style="width:90%;"></textarea>
+                            <span id="txtCount4" class="help-block" style="font-size:12px;">Caracteres restantes=8000</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="txtConsistencia" class="col-sm-3 control-label" style="padding-left:0px; padding-right:0px;">Consistencia</label>
+                        <div class="col-sm-9" style="padding-left:15px;">
+                            <textarea class="form-control validaEval" id="txtConsistencia" rows="3" placeholder="Ingrese texto" style="width:90%;"></textarea>
+                            <span id="txtCount5" class="help-block" style="font-size:12px;">Caracteres restantes=8000</span>
+                        </div>
+                    </div>
+                    <p class="bg-info" style="padding:8px;font-size:12px;">Comentarios por Ámbito de Evaluación</p>
+                    <div class="form-group">
+                        <label for="txtAntPrograma" class="col-sm-3 control-label" style="padding-left:0px; padding-right:0px;">Antecedentes del Programa</label>
+                        <div class="col-sm-9" style="padding-left:15px;">
+                            <textarea class="form-control validaEval" id="txtAntPrograma" rows="3" placeholder="Ingrese texto" style="width:90%;"></textarea>
+                            <span id="txtCount6" class="help-block" style="font-size:12px;">Caracteres restantes=8000</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="txtDiagPrograma" class="col-sm-3 control-label" style="padding-left:0px; padding-right:0px;">Diagnóstico de la Necesidad del Programa</label>
+                        <div class="col-sm-9" style="padding-left:15px;">
+                            <textarea class="form-control validaEval" id="txtDiagPrograma" rows="3" placeholder="Ingrese texto" style="width:90%;"></textarea>
+                            <span id="txtCount7" class="help-block" style="font-size:12px;">Caracteres restantes=8000</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="txtObjPobPrograma" class="col-sm-3 control-label" style="padding-left:0px; padding-right:0px;">Objetivo del Programa y Población</label>
+                        <div class="col-sm-9" style="padding-left:15px;">
+                            <textarea class="form-control validaEval" id="txtObjPobPrograma" rows="3" placeholder="Ingrese texto" style="width:90%;"></textarea>
+                            <span id="txtCount8" class="help-block" style="font-size:12px;">Caracteres restantes=8000</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="txtEstraPrograma" class="col-sm-3 control-label" style="padding-left:0px; padding-right:0px;">Estrategia del Programa</label>
+                        <div class="col-sm-9" style="padding-left:15px;">
+                            <textarea class="form-control validaEval" id="txtEstraPrograma" rows="3" placeholder="Ingrese texto" style="width:90%;"></textarea>
+                            <span id="txtCount9" class="help-block" style="font-size:12px;">Caracteres restantes=8000</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="txtIndicadores" class="col-sm-3 control-label" style="padding-left:0px; padding-right:0px;">Indicadores</label>
+                        <div class="col-sm-9" style="padding-left:15px;">
+                            <textarea class="form-control validaEval" id="txtIndicadores" rows="3" placeholder="Ingrese texto" style="width:90%;"></textarea>
+                            <span id="txtCount10" class="help-block" style="font-size:12px;">Caracteres restantes=8000</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="txtGastos" class="col-sm-3 control-label" style="padding-left:0px; padding-right:0px;">Gastos</label>
+                        <div class="col-sm-9" style="padding-left:15px;">
+                            <textarea class="form-control validaEval" id="txtGastos" rows="3" placeholder="Ingrese texto" style="width:90%;"></textarea>
+                            <span id="txtCount11" class="help-block" style="font-size:12px;">Caracteres restantes=8000</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" data-loading-text="Guardando..." id="btnGuardarEvaluacion">Guardar</button>
+                <button type="button" class="btn btn-success" data-loading-text="Enviando..." id="btnEnviarEvaluacion">Enviar</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!--Modal mensajes evaluadores-->
+<div id="modalMsjEvaluadores" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Advertencia</h4>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="txtIdPrograma" value="" />
+                <input type="hidden" id="txtIdEvaluador" value="" />
+                <input type="hidden" id="txtNumEvaluador" value="" />
+                <p>¿Está seguro que desea cambiar el evaluador asignado?</p>
+            </div>
+            <div class="modal-footer">
+                <button id="btnModalEvalCancel" type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                <button id="btnMsjEvalAcep" type="button" data-loading-text="Guardando..." class="btn btn-primary">Aceptar</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!--Modal mensajes cerrar evaluacion-->
+<div id="modalMsjCerrarEvaluacion" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Advertencia</h4>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="txtIdProgCierraEval" value="" />
+                <p>¿Está seguro que quiere dar por terminado el proceso de evaluación de este programa? </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                <button id="btnMsjCierraEvalAcep" type="button" data-loading-text="Guardando..." class="btn btn-primary">Aceptar</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!--Modal mensajes revisión de jefaturas-->
+<div id="modalRevisionJefaturas" class="modal fade" data-backdrop="static" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Revisión de informe de evaluación</h4>
+            </div>
+            <form method="post" action="" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <input type="hidden" id="txtIdProgramaRevJef" value="0" />
+                    <input type="hidden" id="cmbEvaluador1" value="" />
+                    <input type="hidden" id="cmbEvaluador2" value="" />
+                    <div class="form-horizontal">
+                        <div class="form-group">
+                            <label for="cmbTieneComentMonitoreo" class="col-sm-3 control-label">Comentarios Jefatura Monitoreo</label>
+                            <div class="col-sm-9" style="padding-left:15px;">
+                                <select id="cmbTieneComentMonitoreo" class="form-control" style="width:90%;">
+                                    <option value="-1">Seleccione</option>
+                                    <option value="Si">Si</option>
+                                    <option value="No">No</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group divPregComentMonitoreo">
+                            <label for="txtComentMonitoreo" class="col-sm-3 control-label">Comentarios</label>
+                            <div class="col-sm-9" style="padding-left:15px;">
+                                <textarea class="form-control validaEval" id="txtComentMonitoreo" rows="3" maxlength="8000" aria-describedby="txtComentMonitoreo" placeholder="Ingrese comentario" style="width:90%;"></textarea>
+                                <span id="txtCountComentMonitoreo" class="help-block" style="font-size:12px;">Caracteres restantes=8000</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="cmbTieneComentEstudio" class="col-sm-3 control-label">Comentarios Jefatura Estudios</label>
+                            <div class="col-sm-9" style="padding-left:15px;">
+                                <select id="cmbTieneComentEstudio" class="form-control" style="width:90%;">
+                                    <option value="-1">Seleccione</option>
+                                    <option value="Si">Si</option>
+                                    <option value="No">No</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group divPregComentEstudio">
+                            <label for="txtComentEstudio" class="col-sm-3 control-label">Comentarios</label>
+                            <div class="col-sm-9" style="padding-left:15px;">
+                                <textarea class="form-control validaEval" id="txtComentEstudio" rows="3" maxlength="8000" aria-describedby="txtComentEstudio" placeholder="Ingrese comentario" style="width:90%;"></textarea>
+                                <span id="txtCountComentEstudio" class="help-block" style="font-size:12px;">Caracteres restantes=8000</span>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" data-loading-text="Enviando..." id="btnEnviarRevJefatura">Enviar</button>                                     
+                </div>
+            </form>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!--Modal comentarios de sectorialista-->
+<div id="modalComentariosSectorialistas" class="modal fade" data-backdrop="static" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Revisión de informe de evaluación</h4>
+            </div>
+            <form method="post" action="" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <input type="hidden" id="txtIdProgramaCS" value="0" />
+                    <input type="hidden" id="cmbEvaluador1CS" value="" />
+                    <input type="hidden" id="cmbEvaluador2CS" value="" />
+                    <div class="form-horizontal">
+                        <div class="form-group">
+                            <label for="cmbTieneComentariosSect" class="col-sm-3 control-label">¿Desea agregar comentarios?</label>
+                            <div class="col-sm-9" style="padding-left:15px;">
+                                <select id="cmbTieneComentariosSect" class="form-control" style="width:90%;">
+                                    <option value="-1">Seleccione</option>
+                                    <option value="Si">Si</option>
+                                    <option value="No">No</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group divComentariosSect">
+                            <label for="idInformeSectPDF" class="col-sm-3 control-label">Subir comentarios</label>
+                            <div class="col-sm-9" style="padding-left:15px;">
+                                <input type="file" id="idInformeSectPDF" name="idInformeSectPDF" class="form-control" style="width:90%; float:left;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" data-loading-text="Enviando..." id="btnEnviarCS">Enviar</button>
+                </div>
+            </form>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!--Modal comentarios de jefatura-evaluadores (monitoreo)-->
+<div id="modalComentJefesSectorialistas1" class="modal fade" data-backdrop="static" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Revisión de informe de evaluación</h4>
+            </div>
+            <form method="post" action="" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <input type="hidden" id="txtIdProgramaCJS1" value="0" />
+                    <input type="hidden" id="cmbEvaluador1CJS1" value="" />
+                    <input type="hidden" id="cmbEvaluador2CJS1" value="" />
+                    <div class="form-horizontal">
+                        <div class="form-group">
+                            <label for="cmbTieneComentJefSect1" class="col-sm-3 control-label">¿Desea agregar comentarios?</label>
+                            <div class="col-sm-9" style="padding-left:15px;">
+                                <select id="cmbTieneComentJefSect1" class="form-control" style="width:90%;">
+                                    <option value="-1">Seleccione</option>
+                                    <option value="Si">Si</option>
+                                    <option value="No">No</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group divPregComentJefSect1">
+                            <label for="txtComentJefSect1" class="col-sm-3 control-label">Comentarios</label>
+                            <div class="col-sm-9" style="padding-left:15px;">
+                                <textarea class="form-control validaEval" id="txtComentJefSect1" rows="3" maxlength="8000" aria-describedby="txtComentJefSect1" placeholder="Ingrese comentario" style="width:90%;"></textarea>
+                                <span id="txtCountComentJefSect1" class="help-block" style="font-size:12px;">Caracteres restantes=8000</span>
+                            </div>
+                        </div>
+                        <div class="form-group divPregComentJefSect1">
+                            <label for="idInformeJefSectPDF1" class="col-sm-3 control-label">Adjuntar comentarios</label>
+                            <div class="col-sm-9" style="padding-left:15px;">
+                                <input type="file" id="idInformeJefSectPDF1" name="idInformeJefSectPDF1" class="form-control" style="width:90%; float:left;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" data-loading-text="Enviando..." id="btnEnviarCJS1">Enviar</button>
+                </div>
+            </form>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!--Modal comentarios de jefatura-evaluadores (estudios)-->
+<div id="modalComentJefesSectorialistas2" class="modal fade" data-backdrop="static" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Revisión de informe de evaluación</h4>
+            </div>
+            <form method="post" action="" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <input type="hidden" id="txtIdProgramaCJS2" value="0" />
+                    <input type="hidden" id="cmbEvaluador1CJS2" value="" />
+                    <input type="hidden" id="cmbEvaluador2CJS2" value="" />
+                    <div class="form-horizontal">
+                        <div class="form-group">
+                            <label for="cmbTieneComentJefSect2" class="col-sm-3 control-label">¿Desea agregar comentarios?</label>
+                            <div class="col-sm-9" style="padding-left:15px;">
+                                <select id="cmbTieneComentJefSect2" class="form-control" style="width:90%;">
+                                    <option value="-1">Seleccione</option>
+                                    <option value="Si">Si</option>
+                                    <option value="No">No</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group divPregComentJefSect2">
+                            <label for="txtComentJefSect2" class="col-sm-3 control-label">Comentarios</label>
+                            <div class="col-sm-9" style="padding-left:15px;">
+                                <textarea class="form-control validaEval" id="txtComentJefSect2" rows="3" maxlength="8000" aria-describedby="txtComentJefSect2" placeholder="Ingrese comentario" style="width:90%;"></textarea>
+                                <span id="txtComentJefSect2" class="help-block" style="font-size:12px;">Caracteres restantes=8000</span>
+                            </div>
+                        </div>
+                        <div class="form-group divPregComentJefSect2">
+                            <label for="idInformeJefSectPDF2" class="col-sm-3 control-label">Adjuntar comentarios</label>
+                            <div class="col-sm-9" style="padding-left:15px;">
+                                <input type="file" id="idInformeJefSectPDF2" name="idInformeJefSectPDF2" class="form-control" style="width:90%; float:left;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" data-loading-text="Enviando..." id="btnEnviarCJS2">Enviar</button>
+                </div>
+            </form>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!--Modal mensajes crear nueva iteracion-->
+<div id="modalMsjCrearNuevaIteracion" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Advertencia</h4>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="txtIdProgNuevaIteracion" value="" />
+                <input type="hidden" id="txtVersionProg" value="" />
+                <p>¿Está seguro que desea crear una nueva itearación para éste programa?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                <button id="btnMsjNuevaIteracionAcep" type="button" data-loading-text="Creando..." class="btn btn-primary">Aceptar</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!--Modal mensajes enviar evaluacion-->
+<div id="modalMsjEnviaEvaluacion" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Advertencia</h4>
+            </div>
+            <div class="modal-body">
+                <p>¿Está seguro que desea enviar la evaluación para la revisión por parte de su jefatura?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                <button id="btnMsjEnviaEvaluacionAcep" type="button" data-loading-text="Enviando..." class="btn btn-primary">Aceptar</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!--Modal mensajes revision jefaturas-->
+<div id="modalMsjRevJef" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Advertencia</h4>
+            </div>
+            <div class="modal-body">
+                <p>Al seleccionar enviar, se enviarán los comentarios y archivos adjuntos a la @(Model.tipoJefatura == 1 ? "Jefatura Estudios" : "Jefatura Monitoreo")</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                <button id="btnMsjEnviaRevJefAcep" type="button" data-loading-text="Enviando..." class="btn btn-primary">Aceptar</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!--Modal mensajes finalizar revision jefaturas-->
+<div id="modalMsjFinRevJef" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Advertencia</h4>
+            </div>
+            <form method="post" action="" enctype="multipart/form-data">
+                <input type="hidden" id="txtIdProgramaFinRevJef" value="0" />
+                <div class="modal-body">
+                    <div class="form-horizontal">
+                        <div class="form-group">
+                            <p style="margin: 0px 20px 0px 20px">Al seleccionar finalizar revisión, se enviará el informe de recomendación al Coordinador Ministerial y Contraparte/s Técnica/s</p>
+                        </div>
+                        <div class="form-group">
+                            <label for="idInformePDF" class="col-sm-3 control-label">Subir informe</label>
+                            <div class="col-sm-9" style="padding-left:15px;">
+                                <input type="file" id="idInformePDF" name="idInformePDF" class="form-control" style="width:90%; float:left;">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                        <button id="btnMsjEnviaFinRevJefAcep" type="button" data-loading-text="Finalizando..." class="btn btn-primary">Aceptar</button>
+                    </div>
+                </div>
+            </form>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!--Modal mensajes-->
+<div id="modalMsjEvaluaciones" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header"><h4 class="modal-title">Información</h4></div>
+            <div class="modal-body" id="msjInfoEval"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="btnAcepMsjEval" data-dismiss="modal">Aceptar</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+@section scripts {
+    @Scripts.Render("~/bundles/DataTable")
+    <script type="text/javascript">
+        var ROOT = "@Url.Content("~/")";
+        var informeEvaluacion = "@Model.linkInformeEvalExAnte";
+        var informeDetalle = "@Model.linkInformeDetalleExAnte";
+        var perfil = @Model.perfilEvaluacion;
+        var coordinador = @Model.perfilCoordinadorEval;
+        var soloLectura = @Model.perfilSoloLecturaEval;
+        var etapaCierre = "@Model.etapaCierre";
+        var perfilUsuario = @Model.perfilUsuario;
+        var perfilIterar = 0;
+        var estadoIteracion = @Model.estadoIteracion;
+        var revisionJefaturas = "@Model.revisionJefaturas";
+        var listaNuevosExAnte = @Html.Raw(Json.Encode(Model.idTipoNuevos));
+        var tipoJefatura = @Model.tipoJefatura;
+        var listaReformuladosExAnte = @Html.Raw(Json.Encode(Model.idTipoReformulados));
+        var aEvaluadores = @Html.Raw(Json.Encode(Model.listaEvaluadores));
+        @if (Model.perfilesNuevaIteracion.Count > 0){
+            foreach (var perfil in Model.perfilesNuevaIteracion){
+                if (perfil == Model.perfilUsuario){
+                    <text>perfilIterar = 1;</text>
+                    break;
+                }
+            }
+        }
+    </script>
+    @Scripts.Render("~/bundles/EvalExAnte")
+}

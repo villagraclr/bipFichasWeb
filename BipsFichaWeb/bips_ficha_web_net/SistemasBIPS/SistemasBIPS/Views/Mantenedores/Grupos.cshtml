@@ -1,0 +1,425 @@
+﻿@using SistemasBIPS.Models
+@model GruposViewModels
+@{ MDS.Core.Providers.IProviderConstante constantes = (MDS.Core.Providers.IProviderConstante)Activator.CreateInstance(typeof(MDS.Core.Providers.ProviderConstante)); }
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Ministerio de Desarrollo Social - Gobierno de Chile";
+}
+@section styles {
+    @Styles.Render("~/Content/Fonts_min")
+    @Styles.Render("~/Content/DataTable")
+}
+<div id="page-wrapper">
+    <div class="row">
+        <ol class="breadcrumb breadcrumbBIPS">
+            <li><a><i class="fa fa-gears fa-fw"></i> Mantenedores</a></li>
+            <li class="active"><i class="fa fa-files-o fa-fw"></i> Grupos Formularios</li>
+        </ol>
+    </div>
+    <div class="row">
+        <div class="col-lg-12" style="padding-left:0px;padding-right:0px">
+            <div class="table-responsive">
+                <table class="table table-striped table-bordered table-hover" cellspacing="0" id="tblGruposFormularios">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Descripción</th>
+                            <th>Usuarios</th>
+                            <th>Formularios</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<!--Modal Formularios Grupos-->
+<div id="modalFormGrupos" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="modalTitleFormGrup"></h4>
+            </div>
+            <div class="modal-body" style="height:450px;overflow-y:auto;">
+                <input type="hidden" value="" id="txtGrupoFormModel" />
+                <input type="hidden" value="" id="txtNombreFormModel" />
+                <div class="table-responsive">
+                    <table class="table table-striped table-bordered table-hover" cellspacing="0" id="tblFormulariosGrupos">
+                        <thead>
+                            <tr>
+                                <th>Año</th>
+                                <th>Nombre</th>
+                                <th>Tipo</th>
+                                <th>Ministerio</th>
+                                <th>Servicio</th>
+                                <th><a href="#" onclick="eliminarFormGrupos();" data-toggle="tooltip" data-placement="left" title="Eliminar formulario masivamente">Eliminar</a></th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Aceptar</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!--Modal usuarios grupos-->
+<div id="modalUserGrupos" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="modalTitleUserGroup"></h4>
+            </div>
+            <div class="modal-body" style="height:450px;overflow-y:auto;">
+                <input type="hidden" value="" id="txtGrupoModel" />
+                <input type="hidden" value="" id="txtNombreModel" />
+                <div class="table-responsive">
+                    <table class="table table-striped table-bordered table-hover" cellspacing="0" id="tblUserGroup">
+                        <thead>
+                            <tr>
+                                <th>Usuario</th>
+                                <th>Nombre</th>
+                                <th>Ministerio</th>
+                                <th>Servicio</th>
+                                <th>Tipo Grupo</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Aceptar</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!--Modal Formularios Usuarios-->
+<div id="modalFormUsers" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="modalTitleFormUsers"></h4>
+            </div>
+            <div class="modal-body" style="height:500px;overflow-y:auto;">
+                <div class="table-responsive">
+                    <table class="table table-striped table-bordered table-hover" cellspacing="0" id="tblUsuarios">
+                        <thead>
+                            <tr>
+                                <th>Usuario</th>
+                                <th>Nombre</th>
+                                <th>Ministerio</th>
+                                <th>Servicio</th>
+                                <th>Tipo grupo</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" data-loading-text="Guardando..." id="btnGuardaGrupos">Guardar</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!--Modal Nuevos Grupos-->
+<div id="modalNuevosGrupos" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="modalTitleNuevosGrupos"></h4>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="txtIdGrupo" value="" />
+                <div class="form-horizontal">
+                    <div class="form-group">
+                        <label for="txtNombre" class="col-sm-3 control-label" style="padding-left:0px; padding-right:0px;">Nombre (*)</label>
+                        <div class="col-sm-9" style="padding-left:15px;">
+                            <input type="text" class="form-control" id="txtNombre" placeholder="Ingrese nombre" style="width:95%;" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="txtNombre" class="col-sm-3 control-label" style="padding-left:0px; padding-right:0px;">Descripción (*)</label>
+                        <div class="col-sm-9" style="padding-left:15px;">
+                            <textarea class="form-control" id="txtDescripcion" rows="3" placeholder="Ingrese descripción" style="width:95%;"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" data-loading-text="Guardando..." id="btnGuardaNuevosGrupos">Guardar</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!--Modal Nuevos Formularios-->
+<div id="modalNuevosForm" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="modalTitleNuevosForm">Agregar Formularios</h4>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" value="" id="idTipoAgreForm" />
+                <ul class="nav nav-tabs tipoAgregaForm" role="tablist">
+                    <li role="presentation" class="active" id="liIndivAgreForm"><a href="#individual" aria-controls="individual" role="tab" data-toggle="tab">Individual</a></li>
+                    <li role="presentation"><a href="#grupal" aria-controls="grupal" role="tab" data-toggle="tab">Grupal</a></li>
+                </ul>
+                <div class="tab-content">
+                    <div role="tabpanel" class="tab-pane active" id="individual" style="margin-top:10px;">
+                        <div class="table-responsive" style="height:450px;overflow-y:auto;" id="divTblNuevosForm">
+                            <table class="table table-striped table-bordered table-hover" cellspacing="0" id="tblNuevosForm">
+                                <thead>
+                                    <tr>
+                                        <th>IdBips</th>
+                                        <th>Año</th>
+                                        <th>Ministerio</th>
+                                        <th>Servicio</th>
+                                        <th>Tipo</th>
+                                        <th>Nombre</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div role="tabpanel" class="tab-pane" id="grupal" style="margin-top:10px;">
+                        <div class="form-horizontal">
+                            <div class="form-group">
+                                <label for="cmbAnoFormGrupMasivo" class="col-sm-3 control-label" style="padding-left:0px; padding-right:0px;">Año</label>
+                                <div class="col-sm-9" style="padding-left:15px;">
+                                    <select id="cmbAnoFormGrupMasivo" class="form-control agregaFormGrupMasivo" style="width:70%;">
+                                        <option value="-1">Seleccione</option>
+                                        @if (Model.listaAnos.Count > 0)
+                                        {
+                                            foreach (var ano in Model.listaAnos)
+                                            {
+                                                <option value="@ano">@ano</option>
+                                            }
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="cmbMinisterioFormGrupMasivo" class="col-sm-3 control-label" style="padding-left:0px; padding-right:0px;">Ministerio</label>
+                                <div class="col-sm-9" style="padding-left:15px;">
+                                    <select id="cmbMinisterioFormGrupMasivo" class="form-control agregaFormGrupMasivo" style="width:70%;">
+                                        <option value="-1">Seleccione</option>
+                                        @foreach (var m in Model.listaMinistServ)
+                                        {
+                                            <option value="@m.Ministerios.IdParametro">@m.Ministerios.Descripcion</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="cmbServicioFormGrupMasivo" class="col-sm-3 control-label" style="padding-left:0px; padding-right:0px;">Servicio</label>
+                                <div class="col-sm-9" style="padding-left:15px;">
+                                    <select id="cmbServicioFormGrupMasivo" class="form-control agregaFormGrupMasivo" style="width:70%;">
+                                        <option value="-1">Seleccione</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="cmbTipoFormGrupMasivo" class="col-sm-3 control-label" style="padding-left:0px; padding-right:0px;">Tipo</label>
+                                <div class="col-sm-9" style="padding-left:15px;">
+                                    <select id="cmbTipoFormGrupMasivo" class="form-control agregaFormGrupMasivo" style="width:70%;">
+                                        <option value="-1">Seleccione</option>
+                                        @foreach (var t in Model.tipos.Where(p => p.IdParametro != p.IdCategoria).ToList())
+                                        {
+                                            <option value="@t.IdParametro">@t.Descripcion</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" data-loading-text="Guardando..." id="btnGuardaNuevosForm">Guardar</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!--Modal elimina formularios grupos-->
+<div id="modalElimFormGrupos" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Eliminar formularios</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-horizontal">
+                    <div class="form-group">
+                        <label for="cmbAnoElimGrupo" class="col-sm-3 control-label" style="padding-left:0px; padding-right:0px;">Año</label>
+                        <div class="col-sm-9" style="padding-left:15px;">
+                            <select id="cmbAnoElimGrupo" class="form-control elimFormGrup" style="width:70%;">
+                                <option value="-1">Seleccione</option>
+                                @if (Model.listaAnos.Count > 0)
+                                {
+                                    foreach (var ano in Model.listaAnos)
+                                    {
+                                        <option value="@ano">@ano</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="cmbMinisterioElimGrupo" class="col-sm-3 control-label" style="padding-left:0px; padding-right:0px;">Ministerio</label>
+                        <div class="col-sm-9" style="padding-left:15px;">
+                            <select id="cmbMinisterioElimGrupo" class="form-control elimFormGrup" style="width:70%;">
+                                <option value="-1">Seleccione</option>
+                                @foreach (var m in Model.listaMinistServ)
+                                {
+                                    <option value="@m.Ministerios.IdParametro">@m.Ministerios.Descripcion</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="cmbServicioElimGrupo" class="col-sm-3 control-label" style="padding-left:0px; padding-right:0px;">Servicio</label>
+                        <div class="col-sm-9" style="padding-left:15px;">
+                            <select id="cmbServicioElimGrupo" class="form-control elimFormGrup" style="width:70%;">
+                                <option value="-1">Seleccione</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="cmbTipoElimGrupo" class="col-sm-3 control-label" style="padding-left:0px; padding-right:0px;">Tipo</label>
+                        <div class="col-sm-9" style="padding-left:15px;">
+                            <select id="cmbTipoElimGrupo" class="form-control elimFormGrup" style="width:70%;">
+                                <option value="-1">Seleccione</option>
+                                @foreach (var t in Model.tipos.Where(p => p.IdParametro != p.IdCategoria).ToList())
+                                {
+                                    <option value="@t.IdParametro">@t.Descripcion</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" data-loading-text="Eliminando..." id="btnElimFormGrup">Eliminar</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!--Modal elimina individual-->
+<div id="modalEliminar" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <input type="hidden" value="" id="txtIdEliminar" />            
+            <input type="hidden" value="" id="txtTipoEliminar" />
+            <div class="modal-header"><h4 class="modal-title" id="tituloEliminar"></h4></div>
+            <div class="modal-body" id="bodyEliminar"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" data-loading-text="Eliminando..." id="btnElimFormIndiv">Eliminar</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!--Modal mensaje de confirmacion de accion-->
+<div id="modalMsjConfirm" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <input type="hidden" value="" id="txtTipoMsj" />
+            <div class="modal-header"><h4 class="modal-title" id="tituloMsjConfirm"></h4></div>
+            <div class="modal-body" id="bodyMsjConfirm"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" data-loading-text="Guardando..." id="btnMsjConfirm">Aceptar</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!--Modal mensajes-->
+<div id="modalMsjGrupos" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header"><h4 class="modal-title">Información</h4></div>
+            <div class="modal-body" id="msjInfoGrupos"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Aceptar</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+@section scripts {
+    @Scripts.Render("~/bundles/DataTable")
+    <script type="text/javascript">
+        var ROOT = "@Url.Content("~/")";
+        var aAgregaForm = [];
+        var creaGrupos = 0;
+        @if (Model.listaPermisosPerfiles.Count > 0){
+            if (Model.listaPermisosPerfiles.Count(p => p.IdPermiso == decimal.Parse(constantes.GetValue("PermisoNuevosGrupos"))) > 0){
+                <text>creaGrupos = 1;</text>
+            }
+        }
+        var asignaFormularios = 0;
+        @if (Model.listaPermisosPerfiles.Count > 0){
+            if (Model.listaPermisosPerfiles.Count(p => p.IdPermiso == decimal.Parse(constantes.GetValue("PermisoAsignarFormGrupos"))) > 0){
+                <text>asignaFormularios = 1;</text>
+            }
+        }
+        var asignaUsuarios = 0;
+        @if (Model.listaPermisosPerfiles.Count > 0){
+            if (Model.listaPermisosPerfiles.Count(p => p.IdPermiso == decimal.Parse(constantes.GetValue("PermisoAsignarUsersGroup"))) > 0){
+                <text>asignaUsuarios = 1;</text>
+            }
+        }
+        var aMinsServ = [];
+        @foreach (var m in Model.listaMinistServ)
+        {
+            <text>
+        var mi = {};
+        mi.IdParametro = @m.Ministerios.IdParametro;
+        var aServ = [];
+        @foreach (var s in m.Servicios)
+            {
+                <text>
+        var serv = {};
+        serv.IdParametro = @s.IdParametro;
+        serv.Descripcion = "@s.Descripcion";
+        aServ.push(serv);
+        </text>
+            }
+        mi.Servicios = aServ;
+        aMinsServ.push(mi);
+        </text>
+        }
+        var aTiposGrupos = [];
+        @if (Model.tiposGrupos.Count > 0){
+            foreach (var tipo in Model.tiposGrupos){
+                if (tipo.IdParametro != tipo.IdCategoria){
+                    <text>
+                    var tg = {};
+                    tg.IdParametro = @tipo.IdParametro;
+                    tg.Descripcion = "@tipo.Descripcion";
+                    aTiposGrupos.push(tg);
+                    </text>
+                }
+            }
+        }
+    </script>
+    @Scripts.Render("~/bundles/Grupos")
+}

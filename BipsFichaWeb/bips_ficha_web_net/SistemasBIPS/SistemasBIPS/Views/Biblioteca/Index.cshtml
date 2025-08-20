@@ -1,0 +1,116 @@
+﻿@using SistemasBIPS.Models
+@model DescargaBDViewModels
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Ministerio de Desarrollo Social y Familia - Gobierno de Chile";
+}
+@section styles {
+    @Styles.Render("~/Content/Fonts_min")
+}
+<div id="page-wrapper">
+    <!--Miga de pan-->
+    <div class="row">
+        <ol class="breadcrumb breadcrumbBIPS">
+            <li class="active"><i class="fa fa-download fa-fw"></i> Base de datos</li>
+        </ol>
+    </div>
+    <!--Formulario-->
+    <div class="row">
+        <div class="col-lg-12" style="padding-left:0px;padding-right:0px">
+            @using (Html.BeginForm("Descargar", "Biblioteca", FormMethod.Post, new { @class = "form-horizontal", role = "form", id = "descargaBD", enctype = "multipart/form-data" }))
+            {
+                @Html.AntiForgeryToken()
+                <div class="form-group" style="margin-top: 10px;">
+                    <label for="" class="col-sm-2 control-label">Año</label>
+                    <div class="col-sm-6">
+                        <select id="cmbAno" class="form-control input-sm" style="width: 250px;" name="ano">
+                            <option value="-1">Seleccione</option>
+                            @if (Model.anos.Count > 0)
+                            {
+                                foreach (var ano in Model.anos.Where(p=>p.IdCategoria!=p.IdParametro))
+                                {
+                                    <option value="@ano.Valor">@ano.Valor</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="" class="col-sm-2 control-label">Tipo de formulario</label>
+                    <div class="col-sm-6">
+                        <select id="cmbFormularios" class="form-control input-sm" style="width: 250px;" name="tipoFormulario">
+                            <option value="-1">Seleccione</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="inputEmail3" class="col-sm-2 control-label">Categorías</label>
+                    <div class="col-sm-6">
+                        @{ int indice = 0; }
+                        @for (int i = 0; i < 3; i++)
+                        {
+                            <div class="col-sm-4">
+                                <div class="checkbox">
+                                    @if (Model.categorias.Count > 0)
+                                    {
+                                        int x = 0;
+                                        double z = Math.Round(double.Parse((Model.categorias.Count / 3).ToString()), 0);                                        
+                                        indice = (i == 0 ? 0 : indice);
+                                        foreach (var check in Model.categorias.Where(p => p.IdParametro != p.IdCategoria && p.IdParametro > indice))
+                                        {
+                                            <label style="width:100%"><input type="checkbox" name="categorias" value="@check.Valor"> @check.Descripcion</label>
+                                            x++;
+                                            if (x >= z)
+                                            {
+                                                indice = int.Parse(check.IdParametro.ToString());
+                                                break;
+                                            }
+                                        }
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-8" style="text-align: center;">
+                        <button id="btnDescargaBD" type="submit" class="btn btn-primary" data-loading-text="Descargando...">Descargar</button>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+<!--Modal mensajes-->
+<div id="modalMsjDescargaBD" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header"><h4 class="modal-title">Información</h4></div>
+            <div class="modal-body" id="msjInfoDescargaBD"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="btnAcepMsjUser" data-dismiss="modal">Aceptar</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+@section scripts {
+    <script type="text/javascript">
+        var tipoForm = [];
+        @if (Model.formularios.Count > 0){
+            foreach(var form in Model.formularios)
+            {
+                <text>
+            var p = {};
+            p.IdParametro = @form.IdParametro;
+            p.idCategoria = @form.IdCategoria;
+            p.Descripcion = "@form.Descripcion";
+            p.Valor = "@form.Valor";
+            p.Valor2 = "@form.Valor2";
+            tipoForm.push(p);
+        </text>
+            }
+        }
+    </script>
+    @Scripts.Render("~/bundles/Moment")
+    @Scripts.Render("~/bundles/Biblioteca")
+}

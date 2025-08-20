@@ -1,0 +1,131 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@{
+    ViewBag.Title = "Ministerio de Desarrollo Social - Gobierno de Chile";
+}
+@section styles {
+    @Styles.Render("~/Content/Fonts_min")
+}
+<div id="page-wrapper">
+    <div class="row">
+        <div class="col-lg-12">
+            <h1 class="page-header" style="margin-top:10px"><small>Escritorio</small></h1>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-red">
+                <div class="panel-heading"><i class="fa fa-bell fa-fw"></i> Notificaciones del Sistema <span class="badge">2</span></div>
+                <div class="panel-body">
+                    <div id="mensajes-sistema" class="carousel slide" style="z-index:1" data-ride="carousel">
+                        <ol class="carousel-indicators">
+                            <li data-target="#mensajes-sistema" data-slide-to="0" class="active"></li>
+                            <li data-target="#mensajes-sistema" data-slide-to="1"></li>
+                        </ol>
+                        <div class="carousel-inner" role="listbox">
+                            <div class="item active">
+                                <div class="well" style="background-color:#eee">
+                                    <h1>Asunto 1</h1>
+                                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum tincidunt est vitae ultrices accumsan. Aliquam ornare lacus adipiscing, posuere lectus et, fringilla augue. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum tincidunt est vitae ultrices accumsan. Aliquam ornare lacus adipiscing.</p>
+                                </div>
+                            </div>
+                            <div class="item">
+                                <div class="well" style="background-color:#eee">
+                                    <h1>Asunto 2</h1>
+                                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum tincidunt est vitae ultrices accumsan. Aliquam ornare lacus adipiscing, posuere lectus et, fringilla augue. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum tincidunt est vitae ultrices accumsan. Aliquam ornare lacus adipiscing.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <a class="left carousel-control" style="background-image:none;width:0%" href="#mensajes-sistema" role="button" data-slide="prev">
+                            <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+                            <span class="sr-only">Anterior</span>
+                        </a>
+                        <a class="right carousel-control" style="background-image:none;width:0%" href="#mensajes-sistema" role="button" data-slide="next">
+                            <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
+                            <span class="sr-only">Siguiente</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="panel panel-primary">
+                <div class="panel-heading"><i class="fa fa-envelope fa-fw"></i> Mis últimos 5 mensajes</div>
+                <div class="panel-body">
+                    <div class="list-group">
+                        <a href="#" class="list-group-item">
+                            <div>
+                                <strong>Asunto mensaje</strong>
+                                <span class="pull-right text-muted"><em>Hace 4 minutos</em></span>
+                            </div>
+                            <div>
+                                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque eleifend...
+                            </div>
+                        </a>
+                        <a href="#" class="list-group-item">
+                            <div>
+                                <strong>Asunto mensaje</strong>
+                                <span class="pull-right text-muted"><em>Hace 6 minutos</em></span>
+                            </div>
+                            <div>
+                                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque eleifend...
+                            </div>
+                        </a>
+                        <a href="#" class="list-group-item">
+                            <div>
+                                <strong>Asunto mensaje</strong>
+                                <span class="pull-right text-muted"><em>Hace 1 día</em></span>
+                            </div>
+                            <div>
+                                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque eleifend...
+                            </div>
+                        </a>
+                    </div>
+                    @*<a href="#" id="aTodosMensajes" onclick="clickMenu('aMenuMensajes', 'Mensajes', 'Home');" class="btn btn-default btn-block">Ver todos mis mensajes</a>*@
+                    @Html.ActionLink("Ver todos mis mensajes", "Mensajes", "Home", new { }, new { @class = "btn btn-default btn-block" })
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="panel panel-default">
+                <div class="panel-heading"><i class="fa fa-edit fa-fw"></i> Mis últimos 5 programas tomados</div>
+                <div class="panel-body">
+                    <div class="list-group">
+                        <a href="#" class="list-group-item">
+                            <i class="fa fa-eye fa-fw"></i> Prueba 1.0 (Nuevo)
+                            <span class="pull-right text-muted small"><em>Hace 4 minutos</em></span>
+                        </a>
+                        <a href="#" class="list-group-item">
+                            <i class="fa fa-save fa-fw"></i> Prueba 2.0 (Reformulado)
+                            <span class="pull-right text-muted small"><em>Hace 6 minutos</em></span>
+                        </a>
+                        <a href="#" class="list-group-item">
+                            <i class="fa fa-eye fa-fw"></i> Prueba 3.0 (Vigente)
+                            <span class="pull-right text-muted small"><em>Hace 7 minutos</em></span>
+                        </a>
+                        <a href="#" class="list-group-item">
+                            <i class="fa fa-save fa-fw"></i> Prueba 4.0 (Iniciativa)
+                            <span class="pull-right text-muted small"><em>Hace 10 minutos</em></span>
+                        </a>
+                        <a href="#" class="list-group-item">
+                            <i class="fa fa-save fa-fw"></i> Prueba 5.0 (Vigente 2)
+                            <span class="pull-right text-muted small"><em>Hace 5 días</em></span>
+                        </a>
+                    </div>
+                    <a href="#" class="btn btn-default btn-block">Ver todos mis programas</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('ul.nav a').each(function () { if ($(this).hasClass('active')) { $(this).removeClass('active'); } });
+            $('#aMenuEscritorio').addClass('active');                        
+        });
+    </script>
+}

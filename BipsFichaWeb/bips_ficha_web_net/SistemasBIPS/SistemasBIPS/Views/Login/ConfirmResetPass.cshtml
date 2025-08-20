@@ -1,0 +1,16 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Ministerio de Desarrollo Social - Gobierno de Chile";
+}
+<div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">Bienvenido (a)</h1>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-6">
+        <div class="alert alert-info">
+            Se restableció la contraseña. @Html.ActionLink("Haga clic aquí para iniciar sesión", "Login", "Login", routeValues: null, htmlAttributes: new { id = "loginLink" })
+        </div>
+    </div>
+</div>

@@ -1,0 +1,54 @@
+﻿@model SistemasBIPS.Models.OlvidoContraseñaViewModel
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@{
+    ViewBag.Title = "Ministerio de Desarrollo Social - Gobierno de Chile";
+}
+<div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">Bienvenido (a)</h1>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-6">
+        <div class="alert alert-info">Plataforma de carga para contrapartes del Banco Integrado de Programas Sociales.</div>
+        <div class="alert alert-warning">Si no recibe el correo con la nueva contraseña, comuniquese con su sectorialista del departamento de monitoreo.</div>
+    </div>
+    <div class="col-md-1"></div>
+    <div id="signupbox" class="mainbox col-md-4">
+        <div class="panel panel-info">
+            <div class="panel-heading">
+                <div class="panel-title">Restablecer Contraseña</div>
+                <div style="float:right; font-size: 85%; position: relative; top:-10px">
+                    @Html.ActionLink("Volver a ingreso", "Login")
+                </div>
+            </div>
+            <div class="panel-body">
+                @using (Html.BeginForm("OlvidoContraseña", "Login", FormMethod.Post, new { @class= "form-horizontal", role = "form", id = "loginform" })) {
+                    @Html.AntiForgeryToken()
+                    <div id="signupalert" style="display:none" class="alert alert-danger">
+                        <p>Error:</p>
+                        <span></span>
+                    </div>
+                    <div class="col-md-12" style="font-size:85%; text-align: justify;padding-left:0px;margin-bottom: 25px;">Para recuperar su contraseña, deberá ingresar su usuario registrado en el sistema. Una vez que usted envíe este formulario se generará una nueva contraseña, que será enviada por correo electrónico a la dirección que se encuentra registrada para su usuario. </div>
+                    <div class="control-group" style="margin-bottom: 25px">
+                        <div class="input-group">
+                            <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>                            
+                            @Html.TextBoxFor(m => m.Email, new { @class = "form-control", id = "login-username", placeholder = "Usuario" })
+                        </div>
+                    </div>
+                    <div style="margin-top:10px" class="form-group">
+                        <div class="col-sm-12 controls">                            
+                            <input type="submit" class="btn btn-primary" value="Restablecer" id="btn-signup" />
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    @Scripts.Render("~/bundles/Login-3")
+}

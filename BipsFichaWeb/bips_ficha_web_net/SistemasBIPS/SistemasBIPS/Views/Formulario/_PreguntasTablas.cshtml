@@ -1,0 +1,102 @@
+﻿@using SistemasBIPS.Models
+@model PreguntasFormulariosPartialView
+<td>
+@if (Model.tipoPregunta == Model.constantes.GetValue("Texto")) {
+	<input type="hidden" name="model.preguntas[@Model.indicePregunta].id" value="@Model.id" />
+	<input type="hidden" name="model.preguntas[@Model.indicePregunta].idTab" value="@Model.idTab" />
+	<input type="text" name="model.preguntas[@Model.indicePregunta].respuesta" class="form-control input-sm" id="txt@(Model.id)" @(Model.funcion.IdParametro.ToString() == Model.constantes.GetValue("LargoTexto") ? "maxlength=" + Model.valorFuncion.First().Valor.ToString() : string.Empty) placeholder="Ingrese registro" value="@Model.respuesta" @(Model.soloLectura ? string.Empty : "readonly") />
+}
+else if (Model.tipoPregunta == Model.constantes.GetValue("TextoReadonly"))
+{
+    <input type="hidden" name="model.preguntas[@Model.indicePregunta].id" value="@Model.id" />
+    <input type="hidden" name="model.preguntas[@Model.indicePregunta].idTab" value="@Model.idTab" />
+    <input type="text" name="model.preguntas[@Model.indicePregunta].respuesta" class="form-control input-sm" id="@(String.IsNullOrEmpty(Model.idTab) ? "txt" + Model.id : "txtTab" + Model.id + Model.idTab)" maxlength="@(Model.valor2Pregunta)" placeholder="Ingrese registro" value="@Model.respuesta" readonly />
+}
+else if (Model.categoriaPregunta == Model.constantes.GetValue("Numerico"))
+{
+	<input type="hidden" name="model.preguntas[@Model.indicePregunta].id" value="@Model.id" />
+	<input type="hidden" name="model.preguntas[@Model.indicePregunta].idTab" value="@Model.idTab" />
+	<input type="text" name="model.preguntas[@Model.indicePregunta].respuesta" class="form-control input-sm limpiaTxt@(Model.idTabla) @(Model.tipoPregunta == Model.constantes.GetValue("NumericoSuma") ? "suma" + Model.idTabla + Model.columna + Model.idTab  + " numTab-" + Model.idTab : string.Empty)" id="txt@(Model.id)" maxlength="@(Model.valor2Pregunta)" onkeypress="return soloNumeros(event,true);" placeholder="Ingrese registro" value="@Model.respuesta" @(Model.soloLectura ? string.Empty : "readonly") />
+} else if (Model.tipoPregunta == Model.constantes.GetValue("Total")) {
+	<input type="hidden" name="model.preguntas[@Model.indicePregunta].id" value="@Model.id" />
+	<input type="hidden" name="model.preguntas[@Model.indicePregunta].idTab" value="@Model.idTab" />
+	<input type="text" name="model.preguntas[@Model.indicePregunta].respuesta" class="form-control input-sm total@(Model.id)" id="txt@(Model.id + Model.idTab)" placeholder="Ingrese registro" value="@Model.respuesta" readonly />
+} 
+else if (Model.tipoPregunta == Model.constantes.GetValue("TextoGrande"))
+{
+	<input type="hidden" name="model.preguntas[@Model.indicePregunta].id" value="@Model.id" />
+	<input type="hidden" name="model.preguntas[@Model.indicePregunta].idTab" value="@Model.idTab" />
+	<textarea class="form-control input-sm" name="model.preguntas[@Model.indicePregunta].respuesta" rows="3" id="txt@(Model.id)" @(Model.funcion.IdParametro.ToString() == Model.constantes.GetValue("LargoTexto") ? "maxlength=" + Model.valorFuncion.First().Valor.ToString() : string.Empty) placeholder="Ingrese registro" aria-describedby="txtCount@(Model.id)" @(Model.soloLectura ? string.Empty : "readonly")>@Model.respuesta</textarea>
+}else if (Model.categoriaPregunta == Model.constantes.GetValue("Combo")){
+	<input type="hidden" name="model.preguntas[@Model.indicePregunta].id" value="@Model.id" />
+	<input type="hidden" name="model.preguntas[@Model.indicePregunta].idTab" value="@Model.idTab" />
+	<select class="form-control input-sm" name="model.preguntas[@Model.indicePregunta].respuesta" id="cmb@(Model.id)" @(Model.soloLectura ? string.Empty : "disabled")>
+
+        @if (Model.tipoPregunta == Model.constantes.GetValue("Seleccione")){
+			<option value="-1" @(Model.respuesta.ToString() == "-1" ? "selected=selected" : string.Empty)>Seleccione</option>
+		}
+
+        @if (Model.valores.Count > 0 && Model.funcion.IdParametro.ToString() != Model.constantes.GetValue("SeleccioneVacio")){		
+			foreach(var val in Model.valores.Where(p => p.IdParametro != p.IdCategoria)){
+				<option value="@val.IdParametro" @(!string.IsNullOrEmpty(Model.respuesta.ToString()) ? (decimal.Parse(Model.respuesta.ToString()) == val.IdParametro ? "selected=selected" : string.Empty) : string.Empty)>@val.Descripcion</option>
+			}
+		}
+
+        @if (Model.tipoPregunta == Model.constantes.GetValue("ComboNumerico")){
+			if (Model.valorFuncion.Count > 0){
+				for(decimal? x = Model.valorFuncion.First().Valor; x <= Model.valorFuncion.First().Valor2; x++){
+					<option value="@(x)" @(!string.IsNullOrEmpty(Model.respuesta.ToString()) ? (decimal.Parse(Model.respuesta.ToString()) == x ? "selected=selected" : string.Empty) : string.Empty)>@x</option>
+				}
+			}
+		}
+
+        @if (Model.tipoPregunta == Model.constantes.GetValue("ComboDinamico")){
+			if (Model.valorFuncion.Count > 0){
+				int valor1 = 0, valor2 = 0;
+				for(decimal? x = (int.TryParse(Model.valorFuncion.First().Valor.ToString(), out valor1) ? (Model.anoFormulario + valor1) : Math.Round(decimal.Parse(Model.valorFuncion.First().Valor.ToString()),0)); x <= (int.TryParse(Model.valorFuncion.First().Valor2.ToString(), out valor2) ? (Model.anoFormulario + valor2) : Math.Round(decimal.Parse(Model.valorFuncion.First().Valor2.ToString()),0)); x++){
+					<option value="@(x)" @(!string.IsNullOrEmpty(Model.respuesta.ToString()) ? (decimal.Parse(Model.respuesta.ToString()) == x ? "selected=selected" : string.Empty) : string.Empty)>@x</option>
+				}
+			}
+		}
+	</select>
+}else if (Model.tipoPregunta == Model.constantes.GetValue("Anos")){
+	if (Model.valorFuncion.Count > 0){		
+		@(Model.anoFormulario + (Model.valorFuncion.First().Valor + Model.valorFuncion.First().Valor2));
+    }
+}else if (Model.tipoPregunta == Model.constantes.GetValue("Etiqueta")){
+    string pregunta = Model.pregunta;
+    string[] pregDinamica = (pregunta.IndexOf('#') >= 0 ? pregunta.Split('#') : new string[] { });
+    if (pregDinamica.Length > 0)
+    {
+        int anosDinamicos = 0;
+        if (pregDinamica[1].IndexOf('-') > 0)
+        {
+            anosDinamicos = Model.anoFormulario - int.Parse(pregDinamica[1].Split('-')[1]);
+        }
+        else if (pregDinamica[1].IndexOf('+') > 0)
+        {
+            anosDinamicos = Model.anoFormulario + int.Parse(pregDinamica[1].Split('+')[1]);
+        }
+        else
+        {
+            anosDinamicos = Model.anoFormulario;
+        }
+        pregunta = pregDinamica[0] + anosDinamicos.ToString() + pregDinamica[2];
+    }
+	@pregunta;
+}else if (Model.tipoPregunta == Model.constantes.GetValue("EtiquetaEspejo")){
+    <label class="lblEspejo@(Model.id)" style="font-weight:normal;"></label>
+}
+else if (Model.tipoPregunta == Model.constantes.GetValue("TotalValidacion"))
+{
+    <div id="divTotVal@(Model.id)">
+        <input type="hidden" name="model.preguntas[@Model.indicePregunta].id" value="@Model.id" />
+        <input type="hidden" name="model.preguntas[@Model.indicePregunta].idTab" value="@Model.idTab" />
+        <input type="text" name="model.preguntas[@Model.indicePregunta].respuesta" class="form-control input-sm total@(Model.id)" id="txt@(Model.id + Model.idTab)" placeholder="Ingrese registro" value="@Model.respuesta" readonly />
+        <span id="imgVal@(Model.id)" class="glyphicon glyphicon-ok form-control-feedback" aria-hidden="true" style="display:none;"></span>
+        <span id="valEstado@(Model.id)" class="sr-only" style="display:none;">(success)</span>
+        <span id="imgValError@(Model.id)" class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true" style="display:none;"></span>
+        <span id="valEstadoError@(Model.id)" class="sr-only" style="display:none;">(error)</span>
+    </div>    
+}
+</td>

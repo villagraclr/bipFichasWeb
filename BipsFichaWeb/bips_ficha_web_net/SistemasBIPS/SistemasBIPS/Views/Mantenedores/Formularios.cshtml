@@ -1,0 +1,819 @@
+﻿@using SistemasBIPS.Models
+@model NuevoFormulariosViewModels
+@{ MDS.Core.Providers.IProviderConstante constantes = (MDS.Core.Providers.IProviderConstante)Activator.CreateInstance(typeof(MDS.Core.Providers.ProviderConstante)); }
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Ministerio de Desarrollo Social - Gobierno de Chile";
+}
+@section styles {
+    @Styles.Render("~/Content/Fonts_min")
+    @Styles.Render("~/Content/DataTable")
+}
+<div id="page-wrapper">
+    <div class="row">
+        <ol class="breadcrumb breadcrumbBIPS">
+            <li><a><i class="fa fa-gears fa-fw"></i> Mantenedores</a></li>
+            <li class="active"><i class="fa fa-file-text-o fa-fw"></i> Formularios</li>
+        </ol>
+    </div>
+    <div class="row">
+        <div class="col-lg-12" style="padding-left:0px;padding-right:0px">
+            <div class="table-responsive">
+                <table class="table table-striped table-bordered table-hover" cellspacing="0" id="tblFormularios">
+                    <thead>
+                        <tr>
+                            <th>Id</th>
+                            <th>Año</th>
+                            <th>Nombre</th>
+                            <th>Tipo</th>
+                            <th>Ministerio</th>
+                            <th>Servicio</th>
+                            <th>Usuarios</th>
+                            <th>Grupos</th>
+                            <th>Eliminar</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<!--Modal nuevos formularios-->
+<div id="modalNuevoFormulario" class="modal fade" data-backdrop="static" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Nuevos formularios</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-horizontal">                    
+                    <div class="form-group">
+                        <label for="cmbTipoCreaForm" class="col-sm-4 control-label" style="padding-left:0px; padding-right:0px;">Tipo de creación</label>
+                        <div class="col-sm-8" style="padding-left:15px;">
+                            <select id="cmbTipoCreaForm" class="form-control" style="width:80%;">
+                                <option value="-1">Seleccione</option>
+                                <option value="1">En blanco</option>
+                                <option value="2">Traspaso 1 a 1</option>
+                                @*<option value="3">Traspaso N a 1</option>*@
+                                @*<option value="4">Traspaso 1 a N</option>*@
+                            </select>
+                        </div>
+                    </div>                    
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btnSiguienteCreaForm">Siguiente</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!--Modal origen formulario-->
+<div id="modalOrigenFormulario" class="modal fade" data-backdrop="static" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Origen formularios</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-horizontal">
+                    <div class="form-group">
+                        <label for="cmbAnoOrig" class="col-sm-3 control-label" style="padding-left:0px; padding-right:0px;">Año</label>
+                        <div class="col-sm-9" style="padding-left:15px;">
+                            <select id="cmbAnoOrig" class="form-control" style="width:90%;">
+                                <option value="-1">Seleccione</option>
+                                @if (Model.listaAnos.Count > 0)
+                                {
+                                    foreach (var ano in Model.listaAnos)
+                                    {
+                                        <option value="@ano">@ano</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="cmbMinisterioOrig" class="col-sm-3 control-label" style="padding-left:0px; padding-right:0px;">Ministerio</label>
+                        <div class="col-sm-9" style="padding-left:15px;">
+                            <select id="cmbMinisterioOrig" class="form-control cmbMinisterio" style="width:90%;">
+                                <option value="-1">Seleccione</option>
+                                @foreach (var m in Model.listaMinistServ)
+                                {
+                                    <option value="@m.Ministerios.IdParametro">@m.Ministerios.Descripcion</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="cmbServicioOrig" class="col-sm-3 control-label" style="padding-left:0px; padding-right:0px;">Servicio</label>
+                        <div class="col-sm-9" style="padding-left:15px;">
+                            <select id="cmbServicioOrig" class="form-control cmbServicio" style="width:90%;">
+                                <option value="-1">Seleccione</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="cmbTipoFormulario" class="col-sm-3 control-label" style="padding-left:0px; padding-right:0px;">Tipo formulario (*)</label>
+                        <div class="col-sm-9" style="padding-left:15px;">
+                            <select id="cmbTipoFormulario" class="form-control filtraTipFormOrig" style="width:90%;">
+                                <option value="-1">Seleccione</option>
+                                @foreach (var t in Model.tipos.Where(p => p.IdParametro != p.IdCategoria).ToList())
+                                {
+                                    <option value="@t.IdParametro">@t.Descripcion</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="cmbGrupoOrig" class="col-sm-3 control-label" style="padding-left:0px; padding-right:0px;">Grupo</label>
+                        <div class="col-sm-9" style="padding-left:15px;">
+                            <select id="cmbGrupoOrig" class="form-control" style="width:90%;">
+                                <option value="-1">Seleccione</option>
+                                @if (Model.listaGrupos.Count > 0){
+                                    foreach (var g in Model.listaGrupos.OrderBy(p => p.Nombre)){                                        
+                                        <option value="@g.IdGrupoFormulario">@g.Nombre</option>   
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" id="btnAtrasOrigForm" data-dismiss="modal">Anterior</button>
+                <button type="button" class="btn btn-primary" id="btnSiguienteOrigForm">Siguiente</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!--Modal formulario vacio-->
+<div id="modalFormularioVacio" class="modal fade" data-backdrop="static" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Nuevos formularios</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-horizontal">
+                    <div class="form-group">
+                        <label for="cmbAnoFormVacio" class="col-sm-3 control-label" style="padding-left:0px; padding-right:0px;">Año (*)</label>
+                        <div class="col-sm-9" style="padding-left:15px;">
+                            <select id="cmbAnoFormVacio" class="form-control agregaFormVacio" style="width:90%;">
+                                <option value="-1">Seleccione</option>
+                                @if (Model.listaAnosDestino.Count > 0)
+                                {
+                                    foreach (var ano in Model.listaAnosDestino)
+                                    {
+                                        <option value="@ano">@ano</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="cmbTipoFormVacio" class="col-sm-3 control-label" style="padding-left:0px; padding-right:0px;">Tipo formulario (*)</label>
+                        <div class="col-sm-9" style="padding-left:15px;">
+                            <select id="cmbTipoFormVacio" class="form-control agregaFormVacio" style="width:90%;">
+                                <option value="-1">Seleccione</option>
+                                @foreach (var t in Model.tipos.Where(p => p.IdParametro != p.IdCategoria).ToList())
+                                {
+                                    <option value="@t.IdParametro">@t.Descripcion</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="cmbMinisterioFormVacio" class="col-sm-3 control-label" style="padding-left:0px; padding-right:0px;">Ministerio (*)</label>
+                        <div class="col-sm-9" style="padding-left:15px;">
+                            <select id="cmbMinisterioFormVacio" class="form-control cmbMinisterio agregaFormVacio" style="width:90%;">
+                                <option value="-1">Seleccione</option>
+                                @foreach (var m in Model.listaMinistServ)
+                                {
+                                    <option value="@m.Ministerios.IdParametro">@m.Ministerios.Descripcion</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="cmbServicioFormVacio" class="col-sm-3 control-label" style="padding-left:0px; padding-right:0px;">Servicio (*)</label>
+                        <div class="col-sm-9" style="padding-left:15px;">
+                            <select id="cmbServicioFormVacio" class="form-control cmbServicio agregaFormVacio" style="width:90%;">
+                                <option value="-1">Seleccione</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="cmbGrupoFormVacio" class="col-sm-3 control-label" style="padding-left:0px; padding-right:0px;">
+                            <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="top" title="Se asigna por defecto al grupo todos" style="cursor:help;"></span> Grupo
+                        </label>
+                        <div class="col-sm-9" style="padding-left:15px;">
+                            <select id="cmbGrupoFormVacio" class="form-control" style="width:90%;">
+                                <option value="-1">Seleccione</option>
+                                @if (Model.listaGrupos.Count > 0){
+                                    foreach (var g in Model.listaGrupos.OrderBy(p => p.Nombre)){
+                                        if (g.IdGrupoFormulario != decimal.Parse(constantes.GetValue("GrupoTodos"))){
+                                            <option value="@g.IdGrupoFormulario">@g.Nombre</option>
+                                        }
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="txtNombreFormVacio" class="col-sm-3 control-label" style="padding-left:0px; padding-right:0px;">Nombre (*)</label>
+                        <div class="col-sm-9" style="padding-left:15px;">
+                            <input type="text" class="form-control" id="txtNombreFormVacio" placeholder="Ingrese nombre" style="width:90%;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" data-loading-text="Guardando..." id="btnGuardaNuevoForm">Guardar</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!--Modal formularios-->
+<div id="modalFormularios" class="modal fade" data-backdrop="static" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Origen Formularios</h4>
+            </div>
+            <div class="modal-body" style="height:450px;overflow-y:auto;">
+                <input type="hidden" value="" id="txtFiltro1" />
+                <input type="hidden" value="" id="txtFiltro2" />
+                <input type="hidden" value="" id="idTipoAgreForm" />
+                <div class="table-responsive">
+                    <table class="table table-striped table-bordered table-hover" cellspacing="0" id="tblFormulariosInd">
+                        <thead>
+                            <tr>
+                                <th>IdBips</th>
+                                <th>Año</th>
+                                <th>Nombre</th>
+                                <th>Tipo</th>
+                                <th>Ministerio</th>
+                                <th>Servicio</th>
+                                <th><input type="checkbox" data-toggle="tooltip" data-placement="left" title="Seleccionar todos los formulario" style="cursor:pointer;" onclick="selecTodosFormOrg(this);" id="cbxSelecTodosFormOrg" value="" /></th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                @*<ul class="nav nav-tabs tipoAgregaForm" role="tablist">
+                    <li role="presentation" class="active" id="liIndivAgreForm"><a href="#individual" aria-controls="individual" role="tab" data-toggle="tab">Individual</a></li>
+                    <li role="presentation"><a href="#grupal" aria-controls="grupal" role="tab" data-toggle="tab">Grupal</a></li>
+                </ul>*@
+                @*<div class="tab-content">
+                    <div role="tabpanel" class="tab-pane active" id="individual" style="margin-top:10px;">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-bordered table-hover" cellspacing="0" id="tblFormulariosInd">
+                                <thead>
+                                    <tr>
+                                        <th>IdBips</th>
+                                        <th>Año</th>
+                                        <th>Nombre</th>
+                                        <th>Tipo</th>
+                                        <th>Ministerio</th>
+                                        <th>Servicio</th>                                                                                
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div role="tabpanel" class="tab-pane" id="grupal" style="margin-top:10px;">
+                        <div class="form-horizontal">
+                            <div class="form-group">
+                                <label for="cmbAnoFormularios" class="col-sm-3 control-label" style="padding-left:0px; padding-right:0px;">Año</label>
+                                <div class="col-sm-9" style="padding-left:15px;">
+                                    <select id="cmbAnoFormularios" class="form-control agregaFormMasivo" style="width:75%;">
+                                        <option value="-1">Seleccione</option>
+                                        @if (Model.listaAnos.Count > 0)
+                                        {
+                                            foreach (var ano in Model.listaAnos)
+                                            {
+                                                <option value="@ano">@ano</option>
+                                            }
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="cmbMinisterioForm" class="col-sm-3 control-label" style="padding-left:0px; padding-right:0px;">Ministerio</label>
+                                <div class="col-sm-9" style="padding-left:15px;">
+                                    <select id="cmbMinisterioForm" class="form-control cmbMinisterio agregaFormMasivo" style="width:75%;">
+                                        <option value="-1">Seleccione</option>
+                                        @foreach (var m in Model.listaMinistServ){
+                                            <option value="@m.Ministerios.IdParametro">@m.Ministerios.Descripcion</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="cmbServicioForm" class="col-sm-3 control-label" style="padding-left:0px; padding-right:0px;">Servicio</label>
+                                <div class="col-sm-9" style="padding-left:15px;">
+                                    <select id="cmbServicioForm" class="form-control cmbServicio agregaFormMasivo" style="width:75%;">
+                                        <option value="-1">Seleccione</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="cmbGrupoForm" class="col-sm-3 control-label" style="padding-left:0px; padding-right:0px;">Grupo</label>
+                                <div class="col-sm-9" style="padding-left:15px;">
+                                    <select id="cmbGrupoForm" class="form-control agregaFormMasivo" style="width:75%;">
+                                        <option value="-1">Seleccione</option>
+                                        @if (Model.listaGrupos.Count > 0){
+                                            foreach (var g in Model.listaGrupos){
+                                                <option value="@g.IdGrupoFormulario">@g.Nombre</option>
+                                            }
+                                        }                                        
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>*@
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal" id="btnAtrasFormularios">Anterior</button>
+                <button type="button" class="btn btn-primary" id="btnGuardaFormularios">Siguiente</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!--Modal formularios restructuracion-->
+<div id="modalFormRestruc" class="modal fade" data-backdrop="static" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Formularios</h4>
+            </div>
+            <div class="modal-body" style="height:450px;overflow-y:auto;">
+                <input type="hidden" value="" id="txtFiltro1" />
+                <input type="hidden" value="" id="txtFiltro2" />
+                <input type="hidden" value="" id="idTipoAgreForm" />
+                <div class="table-responsive">
+                    <table class="table table-striped table-bordered table-hover" cellspacing="0" id="tblFormRestrucc">
+                        <thead>
+                            <tr>
+                                <th>IdBips</th>
+                                <th>Año</th>
+                                <th>Nombre</th>
+                                <th>Tipo</th>
+                                <th>Ministerio</th>
+                                <th>Servicio</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>                
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal" id="btnAtrasFormRestrucc">Anterior</button>
+                <button type="button" class="btn btn-primary" data-loading-text="Guardando..." id="btnGuardaFormRestrucc">Siguiente</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!--Modal formularios destino-->
+<div id="modalFormulariosDestino" class="modal fade" data-backdrop="static" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Destino formularios</h4>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" value="" id="txtFiltro31" />
+                <div class="form-horizontal">
+                    <div class="form-group">
+                        <label for="cmbAnoFormDestino" class="col-sm-4 control-label" style="padding-left:0px; padding-right:0px;">Año (*)</label>
+                        <div class="col-sm-8" style="padding-left:15px;">
+                            <select id="cmbAnoFormDestino" class="form-control agregaFormExistente" style="width:80%;">                                
+                                @if (Model.listaAnosDestino.Count > 0){
+                                    foreach (var ano in Model.listaAnosDestino) {
+                                        <option value="@ano">@ano</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="cmbTipoFormOrigDest" class="col-sm-4 control-label" style="padding-left:0px; padding-right:0px;">Tipo formulario (*)</label>
+                        <div class="col-sm-8" style="padding-left:15px;">
+                            <select id="cmbTipoFormOrigDest" class="form-control agregaFormExistente" style="width:80%;">
+                                <option value="-1">Seleccione</option>
+                                @foreach (var t in Model.tipos.Where(p => p.IdParametro != p.IdCategoria).ToList())
+                                {
+                                    <option value="@t.IdParametro">@t.Descripcion</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="cmbPlantillaDestino" class="col-sm-4 control-label" style="padding-left:0px; padding-right:0px;">Tipo de traspaso (*)</label>
+                        <div class="col-sm-8" style="padding-left:15px;">
+                            <select id="cmbPlantillaDestino" class="form-control agregaFormExistente" style="width:80%;">
+                                <option value="-1">Seleccione</option>                                
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="cmbGrupoFormDestino" class="col-sm-4 control-label" style="padding-left:0px; padding-right:0px;">
+                            <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="top" title="Por defecto se crean los formularios en los grupos de origen y el grupo 'Todos'" style="cursor:help;"></span> Grupo
+                        </label>
+                        <div class="col-sm-8" style="padding-left:15px;">
+                            <select id="cmbGrupoFormDestino" class="form-control" style="width:80%;">
+                                <option value="-1">Seleccione</option>                                
+                                @if (Model.listaGrupos.Count > 0)
+                                {
+                                    foreach (var g in Model.listaGrupos.OrderBy(p => p.Nombre))
+                                    {
+                                        if (g.IdGrupoFormulario != decimal.Parse(constantes.GetValue("GrupoTodos")))
+                                        {
+                                            <option value="@g.IdGrupoFormulario">@g.Nombre</option>
+                                        }
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal" id="btnAtrasFormNuevo">Anterior</button>
+                <button type="button" class="btn btn-primary" data-loading-text="Guardando..." id="btnGuardaFormNuevo">Guardar</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!--Modal formularios restruccturación destino-->
+<div id="modalFormRestDestino" class="modal fade" data-backdrop="static" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Destino formularios</h4>
+            </div>
+            <div class="modal-body">                
+                <div class="form-horizontal">
+                    <div class="form-group">                                                                           
+                        <label for="cmbFormOrig" class="col-sm-3 control-label" style="padding-left:0px; padding-right:0px;">
+                            <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="top" title="Data origen" style="cursor:help;"></span> Origen (*)
+                        </label>
+                        <div class="col-sm-9" style="padding-left:15px;">
+                            <select id="cmbFormOrig" class="form-control restruc1 restruc2" style="width:90%;">
+                                <option value="-1">Seleccione</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="cmbAnoRestDestino" class="col-sm-3 control-label" style="padding-left:0px; padding-right:0px;">
+                            <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="top" title="Data origen" style="cursor:help;"></span> Año (*)
+                        </label>
+                        <div class="col-sm-9" style="padding-left:15px;">
+                            <select id="cmbAnoRestDestino" class="form-control restruc1 restruc2" style="width:90%;">
+                                <option value="-1">Seleccione</option>
+                                @if (Model.listaAnosDestino.Count > 0){
+                                    foreach (var ano in Model.listaAnosDestino){
+                                        <option value="@ano">@ano</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group" id="divPlantRestDest">
+                        <label for="cmbPlantRestDestino" class="col-sm-3 control-label" style="padding-left:0px; padding-right:0px;">
+                            <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="top" title="Data origen" style="cursor:help;"></span> Destino (*)
+                        </label>
+                        <div class="col-sm-9" style="padding-left:15px;">
+                            <select id="cmbPlantRestDestino" class="form-control restruc2" style="width:90%;">
+                                <option value="-1">Seleccione</option>
+                                @if (Model.listaPlantillasTraspaso.Count > 0)
+                                {
+                                    foreach (var p in Model.listaPlantillasTraspaso.OrderBy(p => p.TipoFormularioOrigen))
+                                    {
+                                        <option value="@p.IdPlantillaTraspaso">@p.Nombre</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="cmbGrupoRestDestino" class="col-sm-3 control-label" style="padding-left:0px; padding-right:0px;">
+                            <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="top" title="Data origen" style="cursor:help;"></span> Grupo (*)
+                        </label>
+                        <div class="col-sm-9" style="padding-left:15px;">
+                            <select id="cmbGrupoRestDestino" class="form-control restruc1 restruc2" style="width:90%;">
+                                <option value="-1">Seleccione</option>
+                                @if (Model.listaGrupos.Count > 0){
+                                    foreach (var g in Model.listaGrupos.OrderBy(p => p.Nombre)){
+                                        <option value="@g.IdGrupoFormulario">@g.Nombre</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group" id="divTipoFormRest" style="display:none;">
+                        <label for="cmbTipoFormRest" class="col-sm-3 control-label" style="padding-left:0px; padding-right:0px;">
+                            <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="top" title="Data origen" style="cursor:help;"></span> Tipo (*)
+                        </label>
+                        <div class="col-sm-9" style="padding-left:15px;">
+                            <select id="cmbTipoFormRest" class="form-control restruc1" style="width:90%;">
+                                <option value="-1">Seleccione</option>
+                                @foreach (var t in Model.tipos.Where(p => p.IdParametro != p.IdCategoria).ToList())
+                                {
+                                    <option value="@t.IdParametro">@t.Descripcion</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group" id="divMintFormRest" style="display:none;">
+                        <label for="cmbMinistFormRest" class="col-sm-3 control-label" style="padding-left:0px; padding-right:0px;">
+                            <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="top" title="Data origen" style="cursor:help;"></span> Ministerio (*)
+                        </label>
+                        <div class="col-sm-9" style="padding-left:15px;">
+                            <select id="cmbMinistFormRest" class="form-control cmbMinisterio restruc1" style="width:90%;">
+                                <option value="-1">Seleccione</option>
+                                @foreach (var m in Model.listaMinistServ)
+                                {
+                                    <option value="@m.Ministerios.IdParametro">@m.Ministerios.Descripcion</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group" id="divServFormRest" style="display:none;">
+                        <label for="cmbServFormRest" class="col-sm-3 control-label" style="padding-left:0px; padding-right:0px;">
+                            <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="top" title="Data origen" style="cursor:help;"></span> Servicio (*)
+                        </label>
+                        <div class="col-sm-9" style="padding-left:15px;">
+                            <select id="cmbServFormRest" class="form-control cmbServicio restruc1" style="width:90%;">
+                                <option value="-1">Seleccione</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group" id="divNombreFormRest" style="display:none;">
+                        <label for="txtNombreFormRest" class="col-sm-3 control-label" style="padding-left:0px; padding-right:0px;">
+                            <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="top" title="Data origen" style="cursor:help;"></span> Nombre (*)
+                        </label>
+                        <div class="col-sm-9" style="padding-left:15px;">
+                            <input type="text" class="form-control" id="txtNombreFormRest" placeholder="Ingrese nombre" style="width:90%;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal" id="btnAtrasFormRestNuevo">Anterior</button>
+                <button type="button" class="btn btn-primary" data-loading-text="Guardando..." id="btnGuardaFormRestNuevo">Guardar</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!--Modal resumen filtros-->
+<div id="modalResumenForm" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Formularios seleccionados</h4>
+            </div>
+            <div class="modal-body" style="height:450px;overflow-y:auto;">
+                <div class="table-responsive">
+                    <table class="table table-striped table-bordered table-hover" cellspacing="0" id="tblFiltrosForm">
+                        <thead>
+                            <tr>
+                                <th>Filtro</th>
+                                <th>Descripción</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Aceptar</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!--Modal iteraciones-->
+<div id="modalIteraciones" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Programas para iterar</h4>
+            </div>
+            <div class="modal-body" style="height:450px;overflow-y:auto;">
+                <div class="table-responsive">
+                    <table class="table table-striped table-bordered table-hover" cellspacing="0" id="tblIteraciones">
+                        <thead>
+                            <tr>
+                                <th>Id</th>
+                                <th>Año</th>                                
+                                <th>Ministerio</th>
+                                <th>Servicio</th>
+                                <th>Tipo</th>
+                                <th>Nombre</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" data-loading-text="Guardando..." id="btnGuardaIteracion">Guardar</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!--Modal usuarios-->
+<div id="modalUsuarios" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="modalTitleGrupos">Usuarios</h4>
+            </div>
+            <div class="modal-body" style="height:450px;overflow-y:auto;">
+                <div class="table-responsive">
+                    <table class="table table-striped table-bordered table-hover" cellspacing="0" id="tblUsuarios">
+                        <thead>
+                            <tr>
+                                <th>Usuario</th>
+                                <th>Nombre</th>
+                                <th>Ministerio</th>
+                                <th>Servicio</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Aceptar</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!--Modal grupos-->
+<div id="modalGrupos" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="modalTitleGrupos">Grupos</h4>
+            </div>
+            <div class="modal-body" style="height:450px;overflow-y:auto;">
+                <div class="table-responsive">
+                    <table class="table table-striped table-bordered table-hover" cellspacing="0" id="tblGrupos">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Descripción</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Aceptar</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!--Modal nuevos formularios-->
+<div id="modalCreaJsonForm" class="modal fade" data-backdrop="static" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Crear nuevo archivo de formulario (JSON)</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-horizontal">
+                    <div class="form-group">
+                        <label for="cmbTipoCreaForm" class="col-sm-4 control-label" style="padding-left:0px; padding-right:0px;">Tipo de formulario</label>
+                        <div class="col-sm-8" style="padding-left:15px;">
+                            <select id="cmbTipoFormJson" class="form-control" style="width:90%;">
+                                <option value="-1">Seleccione</option>
+                                @foreach (var t in Model.tipos.Where(p => p.IdParametro != p.IdCategoria).ToList())
+                                {
+                                    <option value="@t.IdParametro">@t.Descripcion</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" data-loading-text="Creando..." id="btnCrearFormJson">Crear</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!--Modal eliminar general-->
+<div id="modalEliminarGeneral" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <input type="hidden" value="" id="txtIdEliminar" />
+            <input type="hidden" value="" id="txtTipoEliminar" />
+            <div class="modal-header"><h4 class="modal-title" id="tituloEliminarGnral"></h4></div>
+            <div class="modal-body" id="bodyEliminarGnral"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" data-loading-text="Eliminando..." id="btnElimGenral">Eliminar</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!--Modal mensaje de confirmacion de accion-->
+<div id="modalMsjConfirm" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <input type="hidden" value="" id="txtTipoMsj" />
+            <div class="modal-header"><h4 class="modal-title" id="tituloMsjConfirm"></h4></div>
+            <div class="modal-body" id="bodyMsjConfirm"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" data-loading-text="Guardando..." id="btnMsjConfirm">Aceptar</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!--Modal mensajes-->
+<div id="modalMsjForm" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header"><h4 class="modal-title">Información</h4></div>
+            <div class="modal-body" id="msjInfoForm"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="btnAcepMsjForm" data-dismiss="modal">Aceptar</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+@section scripts {
+    @Scripts.Render("~/bundles/DataTable")
+    <script type="text/javascript">
+        var ROOT = "@Url.Content("~/")";
+        var aAgregaFormOrig = [];
+        var aAgregaFormRest = [];
+        var aAgregaFormOrigTodos = [];
+        var aAgregaIteracion = [];
+        var creaFormularios = 0;
+        @if (Model.listaPermisosPerfiles.Count > 0){
+            if (Model.listaPermisosPerfiles.Count(p => p.IdPermiso == decimal.Parse(constantes.GetValue("PermisoNuevosFormularios"))) > 0){
+                <text>creaFormularios = 1;</text>
+            }
+        }
+        var aMinsServ = [];
+        @foreach (var m in Model.listaMinistServ)
+        {
+            <text>
+            var mi = {};
+            mi.IdParametro = @m.Ministerios.IdParametro;
+            var aServ = [];
+            @foreach (var s in m.Servicios)
+            {
+                <text>
+                var serv = {};
+                serv.IdParametro = @s.IdParametro;
+                serv.Descripcion = "@s.Descripcion";
+                aServ.push(serv);
+                </text>
+            }
+            mi.Servicios = aServ;
+            aMinsServ.push(mi);
+            </text>
+        }
+        var aPlantillasDestino = [];
+        @if (Model.listaPlantillasTraspaso.Count > 0){
+            foreach(var p in Model.listaPlantillasTraspaso){
+                <text>
+                var pd = {};
+                pd.IdPlantillaTraspaso = @p.IdPlantillaTraspaso;
+                pd.Nombre = "@p.Nombre";
+                pd.TipoFormularioOrigen = @p.TipoFormularioOrigen;
+                pd.TipoFormularioDestino = @p.TipoFormularioDestino;
+                aPlantillasDestino.push(pd);
+                </text>
+            }
+        }
+    </script>
+    @Scripts.Render("~/bundles/FormMantenedor")
+}

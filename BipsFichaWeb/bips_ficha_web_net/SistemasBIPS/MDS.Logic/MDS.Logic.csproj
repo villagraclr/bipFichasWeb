@@ -1,0 +1,259 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{BF6934C5-DA3F-4A41-A9CC-710D4B075399}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>MDS.Logic</RootNamespace>
+    <AssemblyName>MDS.Logic</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Dom\ITablaBeneficiariosRisDom.cs" />
+    <Compile Include="Dom\ITablaConsultasDom.base.cs" />
+    <Compile Include="Dom\ITablaExcepcionesMenuDom.base.cs" />
+    <Compile Include="Dom\ITablaExcepcionesMenuDom.extended.cs" />
+    <Compile Include="Dom\ITablaExcepcionesPreguntasDom.base.cs" />
+    <Compile Include="Dom\ITablaExcepcionesPreguntasDom.extended.cs" />
+    <Compile Include="Dom\ITablaFormulariosGruposDom.base.cs" />
+    <Compile Include="Dom\ITablaFormulariosGruposDom.extended.cs" />
+    <Compile Include="Dom\ITablaFuncionesDependenciasDom.base.cs" />
+    <Compile Include="Dom\ITablaFuncionesDependenciasDom.extended.cs" />
+    <Compile Include="Dom\ITablaGruposFormulariosDom.base.cs" />
+    <Compile Include="Dom\ITablaGruposFormulariosDom.extended.cs" />
+    <Compile Include="Dom\ITablaLogFormulariosDom.base.cs" />
+    <Compile Include="Dom\ITablaLogFormulariosDom.extended.cs" />
+    <Compile Include="Dom\ITablaLogSesionDom.base.cs" />
+    <Compile Include="Dom\ITablaLogSesionDom.extended.cs" />
+    <Compile Include="Dom\ITablaMenuFormulariosDom.base.cs" />
+    <Compile Include="Dom\ITablaMenuFormulariosDom.extended.cs" />
+    <Compile Include="Dom\ITablaParametrosDom.base.cs" />
+    <Compile Include="Dom\ITablaParametrosDom.extended.cs" />
+    <Compile Include="Dom\ITablaParametrosUsuariosDom.base.cs" />
+    <Compile Include="Dom\ITablaParametrosUsuariosDom.extended.cs" />
+    <Compile Include="Dom\ITablaPerfilesDom.base.cs" />
+    <Compile Include="Dom\ITablaPerfilesDom.extended.cs" />
+    <Compile Include="Dom\ITablaPlantillasTraspasoDom.base.cs" />
+    <Compile Include="Dom\ITablaPlantillasTraspasoDom.extended.cs" />
+    <Compile Include="Dom\ITablaPreguntasFormulariosDom.base.cs" />
+    <Compile Include="Dom\ITablaPreguntasFormulariosDom.extended.cs" />
+    <Compile Include="Dom\ITablaPreguntasGruposDom.base.cs" />
+    <Compile Include="Dom\ITablaPreguntasGruposDom.extended.cs" />
+    <Compile Include="Dom\ITablaPreguntasRespuestasDom.base.cs" />
+    <Compile Include="Dom\ITablaPreguntasTablasDom.base.cs" />
+    <Compile Include="Dom\ITablaPreguntasTablasDom.extended.cs" />
+    <Compile Include="Dom\ITablaProgramasDom.base.cs" />
+    <Compile Include="Dom\ITablaProgramasDom.extended.cs" />
+    <Compile Include="Dom\ITablaProgramasUsuariosDom.base.cs" />
+    <Compile Include="Dom\ITablaProgramasUsuariosDom.extended.cs" />
+    <Compile Include="Dom\ITablaRelacionFormulariosDom.base.cs" />
+    <Compile Include="Dom\ITablaRelacionFormulariosDom.extended.cs" />
+    <Compile Include="Dom\ITablaRespuestasConsultasDom.base.cs" />
+    <Compile Include="Dom\ITablaRespuestasDom.base.cs" />
+    <Compile Include="Dom\ITablaRespuestasDom.extended.cs" />
+    <Compile Include="Dom\ITablaRolesDom.base.cs" />
+    <Compile Include="Dom\ITablaRolesDom.extended.cs" />
+    <Compile Include="Dom\ITablaUsuariosDom.base.cs" />
+    <Compile Include="Dom\ITablaUsuariosDom.extended.cs" />
+    <Compile Include="Dom\TablaBeneficiariosRisDom.cs" />
+    <Compile Include="Dom\TablaConsultasDom.base.cs" />
+    <Compile Include="Dom\TablaExcepcionesMenuDom.base.cs" />
+    <Compile Include="Dom\TablaExcepcionesMenuDom.extended.cs" />
+    <Compile Include="Dom\TablaExcepcionesPreguntasDom.base.cs" />
+    <Compile Include="Dom\TablaExcepcionesPreguntasDom.extended.cs" />
+    <Compile Include="Dom\TablaFormulariosGruposDom.base.cs" />
+    <Compile Include="Dom\TablaFormulariosGruposDom.extended.cs" />
+    <Compile Include="Dom\TablaFuncionesDependenciasDom.base.cs" />
+    <Compile Include="Dom\TablaFuncionesDependenciasDom.extended.cs" />
+    <Compile Include="Dom\TablaGruposFormulariosDom.base.cs" />
+    <Compile Include="Dom\TablaGruposFormulariosDom.extended.cs" />
+    <Compile Include="Dom\TablaLogFormulariosDom.base.cs" />
+    <Compile Include="Dom\TablaLogFormulariosDom.extended.cs" />
+    <Compile Include="Dom\TablaLogSesionDom.base.cs" />
+    <Compile Include="Dom\TablaLogSesionDom.extended.cs" />
+    <Compile Include="Dom\TablaMenuFormulariosDom.base.cs" />
+    <Compile Include="Dom\TablaMenuFormulariosDom.extended.cs" />
+    <Compile Include="Dom\TablaParametrosDom.base.cs" />
+    <Compile Include="Dom\TablaParametrosDom.extended.cs" />
+    <Compile Include="Dom\TablaParametrosUsuariosDom.base.cs" />
+    <Compile Include="Dom\TablaParametrosUsuariosDom.extended.cs" />
+    <Compile Include="Dom\TablaPerfilesDom.base.cs" />
+    <Compile Include="Dom\TablaPerfilesDom.extended.cs" />
+    <Compile Include="Dom\TablaPlantillasTraspasoDom.base.cs" />
+    <Compile Include="Dom\TablaPlantillasTraspasoDom.extended.cs" />
+    <Compile Include="Dom\TablaPreguntasFormulariosDom.base.cs" />
+    <Compile Include="Dom\TablaPreguntasFormulariosDom.extended.cs" />
+    <Compile Include="Dom\TablaPreguntasGruposDom.base.cs" />
+    <Compile Include="Dom\TablaPreguntasGruposDom.extended.cs" />
+    <Compile Include="Dom\TablaPreguntasRespuestasDom.base.cs" />
+    <Compile Include="Dom\TablaPreguntasTablasDom.base.cs" />
+    <Compile Include="Dom\TablaPreguntasTablasDom.extended.cs" />
+    <Compile Include="Dom\TablaProgramasDom.base.cs" />
+    <Compile Include="Dom\TablaProgramasDom.extended.cs" />
+    <Compile Include="Dom\TablaProgramasUsuariosDom.base.cs" />
+    <Compile Include="Dom\TablaProgramasUsuariosDom.extended.cs" />
+    <Compile Include="Dom\TablaRelacionFormulariosDom.base.cs" />
+    <Compile Include="Dom\TablaRelacionFormulariosDom.extended.cs" />
+    <Compile Include="Dom\TablaRespuestasConsultasDom.base.cs" />
+    <Compile Include="Dom\TablaRespuestasDom.base.cs" />
+    <Compile Include="Dom\TablaRespuestasDom.extended.cs" />
+    <Compile Include="Dom\TablaRolesDom.base.cs" />
+    <Compile Include="Dom\TablaRolesDom.extended.cs" />
+    <Compile Include="Dom\TablaUsuariosDom.base.cs" />
+    <Compile Include="Dom\TablaUsuariosDom.extended.cs" />
+    <Compile Include="Mgr\ITablaBeneficiariosRisMgr.cs" />
+    <Compile Include="Mgr\ITablaConsultasMgr.base.cs" />
+    <Compile Include="Mgr\ITablaExcepcionesMenuMgr.base.cs" />
+    <Compile Include="Mgr\ITablaExcepcionesMenuMgr.extended.cs" />
+    <Compile Include="Mgr\ITablaExcepcionesPreguntasMgr.base.cs" />
+    <Compile Include="Mgr\ITablaExcepcionesPreguntasMgr.extended.cs" />
+    <Compile Include="Mgr\ITablaFormulariosGruposMgr.base.cs" />
+    <Compile Include="Mgr\ITablaFormulariosGruposMgr.extended.cs" />
+    <Compile Include="Mgr\ITablaFuncionesDependenciasMgr.base.cs" />
+    <Compile Include="Mgr\ITablaFuncionesDependenciasMgr.extended.cs" />
+    <Compile Include="Mgr\ITablaGruposFormulariosMgr.base.cs" />
+    <Compile Include="Mgr\ITablaGruposFormulariosMgr.extended.cs" />
+    <Compile Include="Mgr\ITablaLogFormulariosMgr.base.cs" />
+    <Compile Include="Mgr\ITablaLogFormulariosMgr.extended.cs" />
+    <Compile Include="Mgr\ITablaLogSesionMgr.base.cs" />
+    <Compile Include="Mgr\ITablaLogSesionMgr.extended.cs" />
+    <Compile Include="Mgr\ITablaMenuFormulariosMgr.base.cs" />
+    <Compile Include="Mgr\ITablaMenuFormulariosMgr.extended.cs" />
+    <Compile Include="Mgr\ITablaParametrosUsuariosMgr.base.cs" />
+    <Compile Include="Mgr\ITablaParametrosUsuariosMgr.extended.cs" />
+    <Compile Include="Mgr\ITablaPerfilesMgr.base.cs" />
+    <Compile Include="Mgr\ITablaPerfilesMgr.extended.cs" />
+    <Compile Include="Mgr\ITablaPlantillasTraspasoMgr.base.cs" />
+    <Compile Include="Mgr\ITablaPlantillasTraspasoMgr.extended.cs" />
+    <Compile Include="Mgr\ITablaPreguntasFormulariosMgr.base.cs" />
+    <Compile Include="Mgr\ITablaPreguntasFormulariosMgr.extended.cs" />
+    <Compile Include="Mgr\ITablaPreguntasGruposMgr.base.cs" />
+    <Compile Include="Mgr\ITablaPreguntasGruposMgr.extended.cs" />
+    <Compile Include="Mgr\ITablaPreguntasRespuestasMgr.base.cs" />
+    <Compile Include="Mgr\ITablaPreguntasTablasMgr.base.cs" />
+    <Compile Include="Mgr\ITablaPreguntasTablasMgr.extended.cs" />
+    <Compile Include="Mgr\ITablaProgramasMgr.base.cs" />
+    <Compile Include="Mgr\ITablaProgramasMgr.extended.cs" />
+    <Compile Include="Mgr\ITablaProgramasUsuariosMgr.base.cs" />
+    <Compile Include="Mgr\ITablaProgramasUsuariosMgr.extended.cs" />
+    <Compile Include="Mgr\ITablaRelacionFormulariosMgr.base.cs" />
+    <Compile Include="Mgr\ITablaRelacionFormulariosMgr.extended.cs" />
+    <Compile Include="Mgr\ITablaRespuestasConsultasMgr.base.cs" />
+    <Compile Include="Mgr\ITablaRespuestasMgr.base.cs" />
+    <Compile Include="Mgr\ITablaRespuestasMgr.extended.cs" />
+    <Compile Include="Mgr\ITablaUsuariosMgr.base.cs" />
+    <Compile Include="Mgr\ITablaUsuariosMgr.extended.cs" />
+    <Compile Include="Mgr\SistemasBIPSMgr.base.cs" />
+    <Compile Include="Mgr\SistemasBIPSMgr.extended.cs" />
+    <Compile Include="Mgr\ISistemasBIPSMgr.base.cs" />
+    <Compile Include="Mgr\ISistemasBIPSMgr.extended.cs" />
+    <Compile Include="Mgr\ITablaParametrosMgr.base.cs" />
+    <Compile Include="Mgr\ITablaParametrosMgr.extended.cs" />
+    <Compile Include="Mgr\ITablaRolesMgr.base.cs" />
+    <Compile Include="Mgr\ITablaRolesMgr.extended.cs" />
+    <Compile Include="Mgr\TablaBeneficiariosRisMgr.cs" />
+    <Compile Include="Mgr\TablaConsultasMgr.base.cs" />
+    <Compile Include="Mgr\TablaExcepcionesMenuMgr.base.cs" />
+    <Compile Include="Mgr\TablaExcepcionesMenuMgr.extended.cs" />
+    <Compile Include="Mgr\TablaExcepcionesPreguntasMgr.base.cs" />
+    <Compile Include="Mgr\TablaExcepcionesPreguntasMgr.extended.cs" />
+    <Compile Include="Mgr\TablaFormulariosGruposMgr.base.cs" />
+    <Compile Include="Mgr\TablaFormulariosGruposMgr.extended.cs" />
+    <Compile Include="Mgr\TablaFuncionesDependenciasMgr.base.cs" />
+    <Compile Include="Mgr\TablaFuncionesDependenciasMgr.extended.cs" />
+    <Compile Include="Mgr\TablaGruposFormulariosMgr.base.cs" />
+    <Compile Include="Mgr\TablaGruposFormulariosMgr.extended.cs" />
+    <Compile Include="Mgr\TablaLogFormulariosMgr.base.cs" />
+    <Compile Include="Mgr\TablaLogFormulariosMgr.extended.cs" />
+    <Compile Include="Mgr\TablaLogSesionMgr.base.cs" />
+    <Compile Include="Mgr\TablaLogSesionMgr.extended.cs" />
+    <Compile Include="Mgr\TablaMenuFormulariosMgr.base.cs" />
+    <Compile Include="Mgr\TablaMenuFormulariosMgr.extended.cs" />
+    <Compile Include="Mgr\TablaParametrosMgr.base.cs" />
+    <Compile Include="Mgr\TablaParametrosMgr.extended.cs" />
+    <Compile Include="Mgr\TablaParametrosUsuariosMgr.base.cs" />
+    <Compile Include="Mgr\TablaParametrosUsuariosMgr.extended.cs" />
+    <Compile Include="Mgr\TablaPerfilesMgr.base.cs" />
+    <Compile Include="Mgr\TablaPerfilesMgr.extended.cs" />
+    <Compile Include="Mgr\TablaPlantillasTraspasoMgr.base.cs" />
+    <Compile Include="Mgr\TablaPlantillasTraspasoMgr.extended.cs" />
+    <Compile Include="Mgr\TablaPreguntasFormulariosMgr.base.cs" />
+    <Compile Include="Mgr\TablaPreguntasFormulariosMgr.extended.cs" />
+    <Compile Include="Mgr\TablaPreguntasGruposMgr.base.cs" />
+    <Compile Include="Mgr\TablaPreguntasGruposMgr.extended.cs" />
+    <Compile Include="Mgr\TablaPreguntasRespuestasMgr.base.cs" />
+    <Compile Include="Mgr\TablaPreguntasTablasMgr.base.cs" />
+    <Compile Include="Mgr\TablaPreguntasTablasMgr.extended.cs" />
+    <Compile Include="Mgr\TablaProgramasMgr.base.cs" />
+    <Compile Include="Mgr\TablaProgramasMgr.extended.cs" />
+    <Compile Include="Mgr\TablaProgramasUsuariosMgr.base.cs" />
+    <Compile Include="Mgr\TablaProgramasUsuariosMgr.extended.cs" />
+    <Compile Include="Mgr\TablaRelacionFormulariosMgr.base.cs" />
+    <Compile Include="Mgr\TablaRelacionFormulariosMgr.extended.cs" />
+    <Compile Include="Mgr\TablaRespuestasConsultasMgr.base.cs" />
+    <Compile Include="Mgr\TablaRespuestasMgr.base.cs" />
+    <Compile Include="Mgr\TablaRespuestasMgr.extended.cs" />
+    <Compile Include="Mgr\TablaRolesMgr.base.cs" />
+    <Compile Include="Mgr\TablaRolesMgr.extended.cs" />
+    <Compile Include="Mgr\TablaUsuariosMgr.base.cs" />
+    <Compile Include="Mgr\TablaUsuariosMgr.extended.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MDS.Core\MDS.Core.csproj">
+      <Project>{6be07f32-04b3-4893-921e-b9b26efb7cf9}</Project>
+      <Name>MDS.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MDS.Dao\MDS.Dao.csproj">
+      <Project>{345528db-4047-450b-b6cb-64effb2d193b}</Project>
+      <Name>MDS.Dao</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MDS.Dto\MDS.Dto.csproj">
+      <Project>{2f633252-fed0-43ec-a1c4-d78e049128c7}</Project>
+      <Name>MDS.Dto</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

@@ -1,0 +1,59 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@{
+    ViewBag.Title = "Ministerio de Desarrollo Social - Gobierno de Chile";
+}
+@section styles {
+    @Styles.Render("~/Content/Fonts_min")
+    @Styles.Render("~/Content/DataTable")
+}
+<div id="page-wrapper"></div>
+@section scripts {
+    @Scripts.Render("~/bundles/DataTable")
+    @Scripts.Render("~/bundles/jqueryUnobtrusive")
+    <script type="text/javascript">
+        $(document).ready(function () {
+            //Inicio página por defecto            
+            $('#page-wrapper').load('@Url.Action("Escritorio", "Home")');
+            $('#aMenuEscritorio').addClass('active');
+            
+            
+            
+            //Tabla programas
+            $('#tblProgramas').DataTable({
+                "order": [[0, "asc"]],
+                "language": {
+                    "sProcessing": "Procesando...",
+                    "lengthMenu": "Mostrar _MENU_ informes por pagina",
+                    "zeroRecords": "No hay informes disponibles",
+                    "info": "Mostrando informes del _START_ al _END_ de un total de _TOTAL_ informes",
+                    "infoEmpty": "No hay informes disponibles",
+                    "infoFiltered": "encontrados",
+                    "search": "Buscar :",
+                    "sLoadingRecords": "Cargando...",
+                    "paginate": {
+                        "next": "Siguiente",
+                        "previous": "Anterior"
+                    }
+                }
+            });
+        });
+        function clickMenu(menu, accion, controlador) {
+            $('ul.nav a').each(function () { if ($(this).hasClass('active')) { $(this).removeClass('active'); } });
+            var ruta = '@Url.Action("0", "1")';
+            ruta = ruta.replace("0", accion).replace("1", controlador);
+            $('#page-wrapper').empty();
+            $('#page-wrapper').load(ruta);
+            //Asigno clase 'active' a menu
+            $('#' + menu).addClass('active');
+        }
+        function pintaMenu(menu) {
+            $('ul.nav a').each(function () { if ($(this).hasClass('active')) { $(this).removeClass('active'); } });
+            $('#' + menu).addClass('active');
+            if (menu == "aMenuMisProgramas") {
+                $('#menuProgramas').addClass('in');
+            }
+        }
+    </script>    
+}

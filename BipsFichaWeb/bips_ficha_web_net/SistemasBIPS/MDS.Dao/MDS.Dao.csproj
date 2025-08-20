@@ -1,0 +1,191 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{345528DB-4047-450B-B6CB-64EFFB2D193B}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>MDS.Dao</RootNamespace>
+    <AssemblyName>MDS.Dao</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="log4net, Version=1.2.15.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
+      <HintPath>..\packages\log4net.2.0.5\lib\net45-full\log4net.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Practices.EnterpriseLibrary.Common, Version=6.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\EnterpriseLibrary.Common.6.0.1304.0\lib\NET45\Microsoft.Practices.EnterpriseLibrary.Common.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Practices.EnterpriseLibrary.Data, Version=6.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\EnterpriseLibrary.Data.6.0.1304.0\lib\NET45\Microsoft.Practices.EnterpriseLibrary.Data.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Practices.EnterpriseLibrary.ExceptionHandling, Version=6.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\EnterpriseLibrary.ExceptionHandling.6.0.1304.0\lib\NET45\Microsoft.Practices.EnterpriseLibrary.ExceptionHandling.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Practices.EnterpriseLibrary.ExceptionHandling.Logging, Version=6.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\EnterpriseLibrary.ExceptionHandling.Logging.6.0.1304.0\lib\NET45\Microsoft.Practices.EnterpriseLibrary.ExceptionHandling.Logging.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Practices.EnterpriseLibrary.Logging, Version=6.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\EnterpriseLibrary.Logging.6.0.1304.0\lib\NET45\Microsoft.Practices.EnterpriseLibrary.Logging.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Oracle.DataAccess, Version=4.122.1.0, Culture=neutral, PublicKeyToken=89b483f429c47342, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>E:\app\mdinamarca\product\11.2.0\client_1\odp.net\bin\4\Oracle.DataAccess.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data.OracleClient" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ITablaBeneficiariosRisDao.cs" />
+    <Compile Include="ITablaConsultasDao.base.cs" />
+    <Compile Include="ITablaExcepcionesMenuDao.base.cs" />
+    <Compile Include="ITablaExcepcionesMenuDao.extended.cs" />
+    <Compile Include="ITablaExcepcionesPreguntasDao.base.cs" />
+    <Compile Include="ITablaExcepcionesPreguntasDao.extended.cs" />
+    <Compile Include="ITablaFormulariosGruposDao.base.cs" />
+    <Compile Include="ITablaFormulariosGruposDao.extended.cs" />
+    <Compile Include="ITablaFuncionesDependenciasDao.base.cs" />
+    <Compile Include="ITablaFuncionesDependenciasDao.extended.cs" />
+    <Compile Include="ITablaGruposFormulariosDao.base.cs" />
+    <Compile Include="ITablaGruposFormulariosDao.extended.cs" />
+    <Compile Include="ITablaLogFormulariosDao.base.cs" />
+    <Compile Include="ITablaLogFormulariosDao.extended.cs" />
+    <Compile Include="ITablaLogSesionDao.base.cs" />
+    <Compile Include="ITablaLogSesionDao.extended.cs" />
+    <Compile Include="ITablaMenuFormulariosDao.base.cs" />
+    <Compile Include="ITablaMenuFormulariosDao.extended.cs" />
+    <Compile Include="ITablaParametrosDao.base.cs" />
+    <Compile Include="ITablaParametrosDao.extended.cs" />
+    <Compile Include="ITablaParametrosUsuariosDao.base.cs" />
+    <Compile Include="ITablaParametrosUsuariosDao.extended.cs" />
+    <Compile Include="ITablaPerfilesDao.base.cs" />
+    <Compile Include="ITablaPerfilesDao.extended.cs" />
+    <Compile Include="ITablaPermisoUsuarioDao.extended.cs" />
+    <Compile Include="ITablaPlantillasTraspasoDao.base.cs" />
+    <Compile Include="ITablaPlantillasTraspasoDao.extended.cs" />
+    <Compile Include="ITablaPreguntasFormulariosDao.base.cs" />
+    <Compile Include="ITablaPreguntasFormulariosDao.extended.cs" />
+    <Compile Include="ITablaPreguntasGruposDao.base.cs" />
+    <Compile Include="ITablaPreguntasGruposDao.extended.cs" />
+    <Compile Include="ITablaPreguntasRespuestasDao.base.cs" />
+    <Compile Include="ITablaPreguntasTablasDao.base.cs" />
+    <Compile Include="ITablaPreguntasTablasDao.extended.cs" />
+    <Compile Include="ITablaProgramasDao.base.cs" />
+    <Compile Include="ITablaProgramasDao.extended.cs" />
+    <Compile Include="ITablaProgramasUsuariosDao.base.cs" />
+    <Compile Include="ITablaProgramasUsuariosDao.extended.cs" />
+    <Compile Include="ITablaRelacionFormulariosDao.base.cs" />
+    <Compile Include="ITablaRelacionFormulariosDao.extended.cs" />
+    <Compile Include="ITablaRespuestasConsultasDao.base.cs" />
+    <Compile Include="ITablaRespuestasDao.base.cs" />
+    <Compile Include="ITablaRespuestasDao.extended.cs" />
+    <Compile Include="ITablaRolesDao.base.cs" />
+    <Compile Include="ITablaRolesDao.extended.cs" />
+    <Compile Include="ITablaUsuariosDao.base.cs" />
+    <Compile Include="ITablaUsuariosDao.extended.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TablaBeneficiariosRisDao.cs" />
+    <Compile Include="TablaConsultasDao.base.cs" />
+    <Compile Include="TablaExcepcionesMenuDao.base.cs" />
+    <Compile Include="TablaExcepcionesMenuDao.extended.cs" />
+    <Compile Include="TablaExcepcionesPreguntasDao.base.cs" />
+    <Compile Include="TablaExcepcionesPreguntasDao.extended.cs" />
+    <Compile Include="TablaFormulariosGruposDao.base.cs" />
+    <Compile Include="TablaFormulariosGruposDao.extended.cs" />
+    <Compile Include="TablaFuncionesDependenciasDao.base.cs" />
+    <Compile Include="TablaFuncionesDependenciasDao.extended.cs" />
+    <Compile Include="TablaGruposFormulariosDao.base.cs" />
+    <Compile Include="TablaGruposFormulariosDao.extended.cs" />
+    <Compile Include="TablaLogFormulariosDao.base.cs" />
+    <Compile Include="TablaLogFormulariosDao.extended.cs" />
+    <Compile Include="TablaLogSesionDao.base.cs" />
+    <Compile Include="TablaLogSesionDao.extended.cs" />
+    <Compile Include="TablaMenuFormulariosDao.base.cs" />
+    <Compile Include="TablaMenuFormulariosDao.extended.cs" />
+    <Compile Include="TablaParametrosDao.base.cs" />
+    <Compile Include="TablaParametrosDao.extended.cs" />
+    <Compile Include="TablaParametrosUsuariosDao.base.cs" />
+    <Compile Include="TablaParametrosUsuariosDao.extended.cs" />
+    <Compile Include="TablaPerfilesDao.base.cs" />
+    <Compile Include="TablaPerfilesDao.extended.cs" />
+    <Compile Include="TablaPlantillasTraspasoDao.base.cs" />
+    <Compile Include="TablaPlantillasTraspasoDao.extended.cs" />
+    <Compile Include="TablaPreguntasFormulariosDao.base.cs" />
+    <Compile Include="TablaPreguntasFormulariosDao.extended.cs" />
+    <Compile Include="TablaPreguntasGruposDao.base.cs" />
+    <Compile Include="TablaPreguntasGruposDao.extended.cs" />
+    <Compile Include="TablaPreguntasRespuestasDao.base.cs" />
+    <Compile Include="TablaPreguntasTablasDao.base.cs" />
+    <Compile Include="TablaPreguntasTablasDao.extended.cs" />
+    <Compile Include="TablaProgramasDao.base.cs" />
+    <Compile Include="TablaProgramasDao.extended.cs" />
+    <Compile Include="TablaProgramasUsuariosDao.base.cs" />
+    <Compile Include="TablaProgramasUsuariosDao.extended.cs" />
+    <Compile Include="TablaRelacionFormulariosDao.base.cs" />
+    <Compile Include="TablaRelacionFormulariosDao.extended.cs" />
+    <Compile Include="TablaRespuestasConsultasDao.base.cs" />
+    <Compile Include="TablaRespuestasDao.base.cs" />
+    <Compile Include="TablaRespuestasDao.extended.cs" />
+    <Compile Include="TablaRolesDao.base.cs" />
+    <Compile Include="TablaRolesDao.extended.cs" />
+    <Compile Include="TablaUsuariosDao.base.cs" />
+    <Compile Include="TablaUsuariosDao.extended.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MDS.Core\MDS.Core.csproj">
+      <Project>{6be07f32-04b3-4893-921e-b9b26efb7cf9}</Project>
+      <Name>MDS.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MDS.Dto\MDS.Dto.csproj">
+      <Project>{2f633252-fed0-43ec-a1c4-d78e049128c7}</Project>
+      <Name>MDS.Dto</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

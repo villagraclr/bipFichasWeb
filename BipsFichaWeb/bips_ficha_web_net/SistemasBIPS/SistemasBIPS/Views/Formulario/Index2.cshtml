@@ -1,0 +1,538 @@
+﻿@using SistemasBIPS.Models
+@model FormulariosViewModels
+@{
+    ViewBag.Title = "Ministerio de Desarrollo Social y Familia - Gobierno de Chile";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section styles {
+    @Styles.Render("~/Content/Fonts_min")
+    @Styles.Render("~/Content/Formularios")    
+}
+<div id="page-wrapper">
+    <!--Cabecera-->
+    <div class="row" id="divCabeceraPrincipal">
+        <div class="col-md-14 bgceleste cabecera-form">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="row">
+                        <h3 class="nombre"><strong>@Model.cabecera.nombre</strong></h3>
+                        @if (Model.programasEvaluar.Count(p => p.Value == Model.cabecera.idTipo) > 0)
+                        {
+                            if (!String.IsNullOrEmpty(Model.cabecera.version))
+                            {
+                                if (int.Parse(Model.cabecera.version) > 1)
+                                {
+                                    <strong>Versión: </strong> @Model.cabecera.version <br />
+                                }
+                            }
+                        }
+                        <strong>ID: </strong> @Model.idBips <br />
+                        <strong>Tipo: </strong> @Model.cabecera.tipo <br />
+                        <strong>Año: </strong> @Model.cabecera.ano <br />
+                        <strong>Modo: </strong> @Model.cabecera.modo <br />
+                        @if (!String.IsNullOrEmpty(Model.cabecera.fechaModificacion) && !String.IsNullOrEmpty(Model.cabecera.usuarioModificacion))
+                        {
+                            <strong>Última modificación:</strong> @Model.cabecera.fechaModificacion <strong>realizada por:</strong> @Model.cabecera.usuarioModificacion <br />
+                        }
+                        @if (Model.programasEvaluar.Count(p => p.Value == Model.cabecera.idTipo) > 0)
+                        {
+                            if (!String.IsNullOrEmpty(Model.cabecera.version) && !String.IsNullOrEmpty(Model.cabecera.fechaEnvio) && Model.cabecera.idEtapa == Model.constantes.GetValue("EtapaSolciEvalExAnte"))
+                            {
+                                <strong>Fecha de envío: </strong> @Model.cabecera.fechaEnvio <br />
+                            }
+                        }
+                    </div>                    
+                </div>
+                <div class="col-md-4">
+                    <div class="row">
+                        <div class="bloque-botones center-block">
+                            @if (Model.acceso.tipoAcceso == int.Parse(Model.constantes.GetValue("AccesoFormGuardado")))
+                            {
+                                <button type="button" id="guardar" data-loading-text="Guardando..." class="btn btn-primary btn-block btn-guardado btn-guardado-bottom">Guardar</button>
+                            }
+                            else {
+                                <button type="button" class="btn btn-danger btn-block btn-guardado btn-guardado-bottom" disabled="disabled">Solo lectura</button>
+                            }
+                            @using (Html.BeginForm("Salir", "Formulario", FormMethod.Post, new { id = "salirForm" }))
+                            {
+                                @Html.AntiForgeryToken()
+                                <button type="button" id="btnSalir" class="btn btn-default btn-block btn-guardado btn-guardado-bottom">Salir</button>
+                            }
+                            @if (Model.cabecera.idEtapa == Model.constantes.GetValue("EtapaSolciEvalExAnte") && Model.permisoAbreCampos)
+                            {
+                                <button type="button" id="btnEnviarEvaluar" data-loading-text="Enviando..." class="btn btn-info btn-block btn-guardado">Iterar/Evaluar</button>
+                            }
+                            @if (Model.acceso.tipoAcceso == int.Parse(Model.constantes.GetValue("AccesoFormGuardado")))
+                            {
+                                if (Model.cabecera.idEtapa == Model.constantes.GetValue("Etapa0") || Model.cabecera.idEtapa == Model.constantes.GetValue("Etapa1"))
+                                {
+                                    /*if (Model.contrapartes.Count > 0)
+                                    {
+                                        <button type="button" id="btnEnviar" data-loading-text="Enviando..." class="btn btn-success btn-block btn-guardado" disabled>Enviar</button>
+                                    }*/
+                                    if (Model.tipoFormulario == int.Parse(Model.constantes.GetValue("TipoPerfilGore")))
+                                    {
+                                        <button type="button" id="btnEnviar" data-loading-text="Enviando..." class="btn btn-success btn-block btn-guardado" disabled>Enviar</button>
+                                    }
+                                    else
+                                    {
+                                        /*if (String.IsNullOrEmpty(Model.cabecera.version) || Model.cabecera.version == "1")
+                                        {
+                                            if (Model.coordinadores.Count > 0)
+                                            {
+                                                if (Model.coordinadores.Count(p => p.Descripcion == Model.datosUsuario.Email) > 0)
+                                                {
+                                                    <button type="button" id="btnEnviar" data-loading-text="Enviando..." class="btn btn-success btn-block btn-guardado" disabled>Enviar</button>
+                                                }
+                                            }
+                                        }
+                                        else if (!String.IsNullOrEmpty(Model.cabecera.version))*/
+                                        if (!String.IsNullOrEmpty(Model.cabecera.version))
+                                        {
+                                            //if (int.Parse(Model.cabecera.version) > 1)
+                                            //{
+                                            if (Model.contrapartes.Count > 0)
+                                            {
+                                                if (Model.contrapartes.Count(p => p.Valor == Model.datosUsuario.IdPerfil) > 0 || Model.coordinadores.Count(p => p.Descripcion == Model.datosUsuario.Email) > 0)
+                                                {
+                                                        <button type="button" id="btnEnviar" data-loading-text="Enviando..." class="btn btn-success btn-block btn-guardado" disabled>Enviar</button>
+                                                }
+                                            }
+                                            //}
+                                        }
+                                    }
+                                }
+                            }
+                            @if (Model.cabecera.idEtapa == Model.constantes.GetValue("EtapaEvaluacion") && Model.permisoAbreCampos)
+                            {
+                                //<button type="button" id="btnCalcEficiencia" data-loading-text="Ejecutando..." class="btn btn-default btn-block btn-guardado">Calcular</button>
+                            }
+                            @if (Model.programasEvaluar.Count(p => p.Value == Model.cabecera.idTipo) > 0 && Model.permisoVerInformes)
+                            {                                
+                                <button type="button" id="btnDescargaInforme" class="btn btn-default btn-block btn-guardado">Informes</button>
+                            }
+                            @if (Model.cabecera.idEtapa == Model.constantes.GetValue("EtapaEvaluacion") && Model.programasEvaluar.Count(p => p.Value == Model.cabecera.idTipo) > 0 && Model.acceso.tipoAcceso == int.Parse(Model.constantes.GetValue("AccesoFormGuardado")))
+                            {
+                                <button type="button" id="btnEnvioEvaluacion" class="btn btn-default btn-block btn-guardado">Envio Evaluación</button>
+                            }
+                            @if (Model.cabecera.idEtapa == Model.constantes.GetValue("EtapaEvaluacion") && Model.cabecera.idTipo == int.Parse(Model.constantes.GetValue("TipoProgramaGore")) && Model.acceso.tipoAcceso == int.Parse(Model.constantes.GetValue("AccesoFormGuardado")))
+                            {
+                                <button type="button" id="btnEnviarEvaluacionGore" class="btn btn-success btn-block btn-guardado">Enviar Evaluación</button>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>        
+    </div>
+    <!--Formulario-->
+    <form id="formularios" enctype="multipart/form-data" class="form-horizontal" role="form">
+        @Html.AntiForgeryToken()
+        <div class="tab-content" id="principal">
+
+        </div>
+    </form>    
+</div>
+<!--Modal mensajes salir-->
+<div id="modalMensajesSalir" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Información</h4>
+            </div>
+            <div class="modal-body">
+                <p>Los datos que no se han guardado se perderán.<br /> ¿Confirma que desea continuar?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                <button id="btnMensjAceptar" type="button" data-loading-text="Saliendo..." class="btn btn-primary">Aceptar</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!--Modal comentarios-->
+<div id="modalComentarios" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Comentarios</h4>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="idConsulta" value="" />
+                <input type="hidden" id="idPregunta" value="" />
+                <input type="hidden" id="idTab" value="" />
+                <input type="hidden" id="idMenuPadre" value="" />
+                <input type="hidden" id="idMenuHijo" value="" />
+                <div id="divComentarios" class="form-group" style="max-width: 100%; overflow-x: hidden; word-wrap: break-word; max-height: 320px;">
+                    <ul id="ulComentarios" class="chat"></ul>                    
+                </div>
+                <div id="divTextoComentarios" class="form-group" style="display:none;">
+                    <textarea class="form-control input-sm" rows="8" id="txtComentarios" placeholder="Ingrese comentario" aria-describedby="caractComentarios"></textarea>                    
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                <button id="btnNuevoComent" type="button" class="btn btn-success">ingresar comentario</button>
+                <button id="btnIngComent" type="button" data-loading-text="Guardando..." class="btn btn-primary" style="display:none;">Guardar</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+<!--Modal respuestas-->
+<div id="modalRespuestasConsultas" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Ingresar respuesta</h4>
+            </div>
+            <div class="modal-body form-horizontal">
+                <input type="hidden" id="txtIdConsulta" value="" />                                
+                <div class="form-group">
+                    <label for="inputEmail3" class="col-xs-6 col-md-4 control-label">Respuesta</label>
+                    <div class="col-xs-12 col-sm-6 col-md-8">
+                        <textarea class="form-control input-sm" rows="8" id="txtRespuestas" maxlength="1500" placeholder="Ingrese respuesta" aria-describedby="caractRespuestas"></textarea>
+                        <span id="caractRespuestas" class="help-block" style="font-size:12px;">Caracteres restantes=1500</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                <button id="btnIngResp" type="button" data-loading-text="Guardando..." class="btn btn-primary">Ingresar</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+<!--Modal fin revision-->
+<div id="modalFinRevision" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog">
+    <div class="modal-dialog" style="width:300px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Finalizar revisión</h4>
+            </div>
+            <div class="modal-body">
+                <p style="margin-bottom:5px;">Seleccione una opción: </p>
+                <div class="radio">
+                    <label>
+                        <input type="radio" name="optionsRadios" id="iterar" value="option1" checked> Iterar
+                    </label>
+                </div>
+                <div class="radio">
+                    <label>
+                        <input type="radio" name="optionsRadios" id="evaluar" value="option2"> Cierre Pre-Monitoreo
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="btnFinRevCancel" type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                <button id="btnFinRevAcep" type="button" data-loading-text="Guardando..." class="btn btn-primary">Aceptar</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+<!--Modal envio de evaluación-->
+<div id="modalEnvioEvaluacion" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Envío de Evaluación</h4>
+            </div>
+            <div class="modal-body">
+                <p>Seleccione a la/s persona/s que desea enviar la evaluación</p>
+            </div>
+            <div class="modal-footer">
+                @if (Model.cabecera.idTipo != 348)
+                {
+                    <button id="btnEnvioSect" type="button" data-loading-text="Enviando..." class="btn btn-default">Sectorialista</button>
+                }
+                <button id="btnEnvioJef" type="button" data-loading-text="Enviando..." class="btn btn-default">Jefatura</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!--Modal descarga de informes-->
+<div id="modalDescargaInformes" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Informes de Monitoreo</h4>
+            </div>
+            <div class="modal-body form-horizontal">
+                <div class="form-group">
+                    <label for="inputEmail3" class="col-xs-12 col-md-8 control-label">Seleccione versión del informe que desea descargar: </label>
+                    <div class="col-xs-4 col-sm-4 col-md-4">
+                        <select id="cmbVersionInforEval" class="form-control input-sm" style="border-radius:3px;">
+                            <option value="-1">Seleccione</option>
+                            @foreach (KeyValuePair<int, int> i in Model.versiones)
+                            {
+                                <option value="@i.Key">@i.Value</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="btnInforDetalleEval" type="button" class="btn btn-default" data-dismiss="modal" onclick="abreInformes('@Model.informesEvaluacion.FirstOrDefault(p=>p.Valor == 1).Descripcion', @Model.cabecera.ano, @Model.cabecera.idTipo);">Informe detalle</button>
+                <button id="btnInforEvaluacion" type="button" class="btn btn-default" data-dismiss="modal" onclick="abreInformes('@Model.informesEvaluacion.FirstOrDefault(p=>p.Valor == 2).Descripcion', @Model.cabecera.ano, @Model.cabecera.idTipo);">Informe evaluación</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!--Modal mensajes enviar-->
+<div id="modalMensajesEnviar" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog">
+    <div class="modal-dialog" style="width:400px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Advertencia</h4>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-danger" role="alert">
+                    @Html.Raw(new HtmlString(Model.textoEnviarEvaluar))
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                <button id="btnMsjEnviarAcep" type="button" data-loading-text="Enviando..." class="btn btn-primary">Aceptar</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!--Modal mensajes libera programa-->
+<div id="modalMensajeLiberaProg" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Información</h4>
+            </div>
+            <div class="modal-body"><div id="txtMsjLiberaProg" class="alert alert-info" role="alert"></div></div>
+            <div class="modal-footer">
+                <button id="btnLiberaProg" type="button" class="btn btn-primary" data-loading-text="Guardando..." data-dismiss="modal">Aceptar</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!--Modal mensaje de confirmacion de accion-->
+<div id="modalMsjConfirm" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <input type="hidden" value="" id="borraIdConsulta" />
+            <input type="hidden" value="" id="borraIdPrograma" />
+            <input type="hidden" value="" id="borraIdUsuario" />
+            <input type="hidden" value="" id="borraIdMenuPadre" />
+            <input type="hidden" value="" id="borraIdMenuHijo" />
+            <input type="hidden" value="" id="borraIdPregunta" />
+            <div class="modal-header"><h4 class="modal-title" id="tituloMsjConfirm"></h4></div>
+            <div class="modal-body" id="bodyMsjConfirm"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" data-loading-text="Guardando..." id="btnMsjConfirm">Aceptar</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!--Modal mensajes-->
+<div id="modalMensajesFormularios" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button id="btnModalMensajesX" type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Información</h4>
+            </div>
+            <div class="modal-body" id="txtMensajesFormulario"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="btnModalMensajes" data-dismiss="modal">Aceptar</button>
+                <a class="btn btn-primary" style="color: white;" href="" data-loading-text="Recargando..." id="btnModalMensRecargar">Aceptar</a>
+                <a class="btn btn-primary" style="color: white;" href="" data-loading-text="Redirigiendo.." id="btnModalMensRedirigir">Aceptar</a>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!--Modal admisibilidad-->
+<div id="modalEnviarAdmisibilidad" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Nota</h4>
+            </div>
+            <div class="modal-body" id="txtModalAdmisibilidad"></div>
+            <input type="hidden" value="" id="respuestaAdmisibilidad" />
+            @*<input type="hidden" value="@Model.idBips" id="idProgramaAdmisibilidad"/>*@
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" data-loading-text="Guardando..." id="btnModalEnviarAdmisibilidad">Aceptar</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<div id="modalEnviarCalificacion" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title"><b>Importante</b></h4>
+            </div>
+            <div class="modal-body" id="txtModalCalificacion"></div>
+            <input type="hidden" value="" id="respuestaCalificacion" />
+            <input type="hidden" value="@Model.idBips" id="idBipsCalificacion" />
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" data-loading-text="Guardando..." id="btnModalEnviarCalificacion">Aceptar</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<div id="modalEnviarEvaluacionGore" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title"><b>Envío a jefatura</b></h4>
+            </div>
+            <div class="modal-body" id="txtModalEnviarEvaluacionGore"></div>
+            <input type="hidden" value="" id="validaEnvioEvaluacion" />
+            @*<input type="hidden" value="@Model.idBips" id="idBipsCalificacion" />*@
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" data-loading-text="Guardando..." id="btnEnviarJefaturaGore">Aceptar</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+@section scripts {
+    <script src="https://cdn.ckeditor.com/ckeditor5/36.0.1/classic/ckeditor.js"></script>
+    <script src="~/Scripts/jquery.signalR-2.4.2.min.js"></script>
+    <script src="~/signalr/hubs"></script>    
+    <script type="text/javascript">
+        var tipoAcceso = @Model.acceso.tipoAcceso;
+        var accesoFormGuardado = @int.Parse(Model.constantes.GetValue("AccesoFormGuardado"));
+        var tab = @Model.tab;
+        var tabForm = "@Model.tabForm";
+        var anoCabecera = @Model.cabecera.ano;
+        var tipoPrograma = @Model.tipoPrograma;
+        var respuestas = @Html.Raw(Json.Encode(Model.respuestas));
+        var plantillaBase = @Html.Raw(Json.Encode(Model.plantillaBase));
+        var validaciones = @Html.Raw(Json.Encode(Model.validaciones));
+        var etapa = @Model.cabecera.idEtapa;
+        var permisoAbreCampos = "@Model.permisoAbreCampos";
+        var camposValidar = [];
+        var rol = @Model.rolUsuario;
+        var comentarios = @Html.Raw(Json.Encode(Model.comentarios));
+        var comentarioschat;
+        var usuario = "@Model.datosUsuario.Id";
+        $(document).ready(function () {
+            var idProg = @Model.idProgramaBota;
+            var notificacion = $.connection.notificacionesHub;
+            notificacion.client.liberar = function (idPrograma) {
+                if (idPrograma == idProg && tipoAcceso == accesoFormGuardado){
+                    $("#txtMsjLiberaProg").empty();
+                    $("#txtMsjLiberaProg").html("<p>Por solicitud del administrador, se ha liberado este programa. Los cambios realizados serán guardados.</p>");
+                    $('#modalMensajeLiberaProg').modal('show');
+                }
+            };
+            comentarioschat = $.connection.comentariosHub;
+            comentarioschat.client.addComentario = function (comentario) {
+                if (comentario.IdPrograma == idProg){
+                    if (comentario.IdUsuario != usuario){
+                        $("#divCabeceraPrincipal").append('<div id="msjAlert' + comentario.IdPregunta + comentario.IdTab + '" class="alert alert-warning alert-dismissible" role="alert" style="margin-bottom: 10px !important;"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button><strong>¡Nuevo comentario!</strong> Se ha agregado un nuevo comentario en la siguiente pregunta: <strong>' + comentario.Pregunta + "</strong> en la sección de <strong>" + comentario.MenuPadre + " - " + comentario.MenuHijo + '</strong></div>');
+                    }                    
+                    $("#spnTotalComent" + comentario.IdMenuHijo).text(parseInt((($("#spnTotalComent" + comentario.IdMenuHijo).text() == '' || $("#spnTotalComent" + comentario.IdMenuHijo).text() == null) ? 0 : $("#spnTotalComent" + comentario.IdMenuHijo).text())) + 1);
+                    $("#spnPadreTotalComent" + comentario.IdMenu).text(parseInt((($("#spnPadreTotalComent" + comentario.IdMenu).text() == '' || $("#spnPadreTotalComent" + comentario.IdMenu).text() == null) ? 0 : $("#spnPadreTotalComent" + comentario.IdMenu).text())) + 1);
+                    $("#spnTotalComent" + comentario.IdMenuHijo).css("display", "inline");
+                    if ($("#idPregunta").val() == comentario.IdPregunta){
+                        $("#modalComentarios").modal('hide');
+                    }
+                    $("#btnIngresarComent" + comentario.IdPregunta).removeClass("btn-success btn-primary").addClass("btn-warning");
+                    $("#ibtnComent" + comentario.IdPregunta).removeClass("fa-comment fa-pencil-square-o").addClass("fa-bell-o");
+                }
+            };
+            comentarioschat.client.deleteComentario = function (idPrograma, idUsuario, idMenuHijo, idMenuPadre, idPregunta) {
+                if (idPrograma == idProg){
+                    $("#spnTotalComent" + idMenuHijo).text(parseInt($("#spnTotalComent" + idMenuHijo).text()) - 1);
+                    $("#spnPadreTotalComent" + idMenuPadre).text(parseInt($("#spnPadreTotalComent" + idMenuPadre).text()) - 1);
+                    if ($("#idPregunta").val() == idPregunta){
+                        $("#modalComentarios").modal('hide');
+                    }
+                }
+            };
+            $.connection.hub.start();
+            $("#btnLiberaProg").click(function () {
+                $("#btnLiberaProg").button('loading');
+                var fd = new FormData();
+                var respuestas = [];
+                $.each($('form').serializeArray({ checkboxesAsBools: true }), function (i, field) {
+                    var respuesta = {};
+                    respuesta.idPregunta = field.name.split("_")[0];
+                    respuesta.idTab = field.name.split("_")[1];
+                    respuesta.respuesta = field.value;
+                    respuestas.push(respuesta);
+                });
+                var data = JSON.stringify(respuestas);
+                fd.append('id', queryString('_id'));
+                fd.append('data', data);
+                var opciones = {
+                    url: ROOT + "Formulario/GuardaDatos",
+                    data: fd,
+                    type: "post",
+                    contentType: false,
+                    processData: false,
+                    beforeSend: function () { $("#cargaPagina").fadeIn(); },
+                    success: function (result, xhr, status) {
+                        $("#guardar").button('reset');
+                        if (result == "ok") {
+                            window.location.href = ROOT + "Programa/Programas";
+                        } else {
+                            $("#txtMensajesFormulario").empty();
+                            $("#txtMensajesFormulario").html("<p>" + result + "</p>");
+                            $('#modalMensajesFormularios').modal('show');
+                            console.log(result);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        $("#txtMensajesFormulario").empty();
+                        $("#txtMensajesFormulario").html("<p>" + error + "</p>");
+                        $('#modalMensajesFormularios').modal('show');
+                        console.log(error);
+                    },
+                    complete: function () { $("#cargaPagina").fadeOut(); }
+                };
+                $.ajax(opciones);
+            });
+            //Texto enriquecido comentarios
+            ClassicEditor
+            .create(document.querySelector('#txtComentarios'))
+            .then(txtComentarios => {
+                txtComentariosInstancia = txtComentarios;  // Guardamos la instancia en la variable
+            })
+            .catch(error => {
+                console.error(error);
+            });
+        });
+    </script>    
+    @if (Model.cabecera.idTipo == 344)
+    {
+        @Scripts.Render("~/bundles/ValidacionesPerfilGore")
+
+    }
+    else if (Model.cabecera.idTipo == 348)
+    {
+        @Scripts.Render("~/bundles/ValidacionesProgramaGore")
+    }
+    else
+    {
+        @Scripts.Render("~/bundles/Validaciones")
+    }
+
+    @Scripts.Render("~/bundles/SerializeArray")
+    @Scripts.Render("~/bundles/ArmaFormulario")
+    @Scripts.Render("~/bundles/Funciones")
+    @Scripts.Render("~/bundles/Formularios2")
+    @Scripts.Render("~/bundles/Moment")
+}

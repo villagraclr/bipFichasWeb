@@ -1,0 +1,283 @@
+﻿@using SistemasBIPS.Models
+@model DashboardViewModels
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Ministerio de Desarrollo Social - Gobierno de Chile";
+}
+@section styles {
+    @Styles.Render("~/Content/Fonts_min")
+    @Styles.Render("~/Content/Dashboard")
+}
+<div id="page-wrapper">
+    <div class="row">
+        <ol class="breadcrumb breadcrumbBIPS">
+            <li><a><i class="fa fa-folder-open-o fa-fw"></i> Ex-Ante</a></li>
+            <li class="active"><i class="fa fa-tachometer fa-fw"></i> Dashboard</li>
+        </ol>
+    </div>
+    <div class="row">
+        <div class="col-xs-6 col-lg-4">
+            <div class="panel-group">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">
+                            Ministerio
+                        </h4>
+                    </div>
+                    <div class="panel-body">
+                        <select id="selectMinisterio" class="form-control">
+                            <option value="-1">Seleccione</option>
+                            @foreach (var m in Model.ministerios.Where(p=>p.IdParametro != p.IdCategoria).OrderBy(p=>p.Orden))
+                            {
+                                <option value="@m.IdParametro">@m.Descripcion</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-6 col-lg-4">
+            <div class="panel-group">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">
+                            Servicio
+                        </h4>
+                    </div>
+                    <div class="panel-body">
+                        <select id="selectServicio" class="form-control" disabled>
+                            <option value="-1">Seleccione</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-6 col-lg-4">
+            <div class="panel-group">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">
+                            Programa
+                        </h4>
+                    </div>
+                    <div class="panel-body">
+                        <select id="selectPrograma" class="form-control" disabled>
+                            <option value="-1">Seleccione</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-6 col-lg-4">
+            <div class="panel-group">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">
+                            Nº de iteración
+                        </h4>
+                    </div>
+                    <div class="panel-body">
+                        <select id="selectIteracion" class="form-control">
+                            <option value="-1">Seleccione</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-6 col-lg-4">
+            <div class="panel-group">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">
+                            Evaluador/a 1
+                        </h4>
+                    </div>
+                    <div class="panel-body">
+                        <select id="selectEvaluadorUno" class="form-control">
+                            <option value="-1">Seleccione</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-6 col-lg-4">
+            <div class="panel-group">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">
+                            Evaluador/a 2
+                        </h4>
+                    </div>
+                    <div class="panel-body">
+                        <select id="selectEvaluadorDos" class="form-control">
+                            <option value="-1">Seleccione</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-6 col-lg-3">
+            <div class="panel panel-default text-center">
+                <div id="programasIngresados" class="panel-body" style="font-size: 24px; font-weight: 400;">-</div>
+                <div class="panel-footer" style="font-size: 12px;">Programas ingresados</div>
+            </div>
+        </div>
+        <div class="col-xs-6 col-lg-3">
+            <div class="panel panel-default text-center">
+                <div id="programasEvaluados" class="panel-body" style="font-size: 24px; font-weight: 400;">-</div>
+                <div class="panel-footer" style="font-size: 12px;">Programas evaluados</div>
+            </div>
+        </div>
+        <div class="col-xs-6 col-lg-3">
+            <div class="panel panel-default text-center">
+                <div id="programasPromedio" class="panel-body" style="font-size: 24px; font-weight: 400;">-</div>
+                <div class="panel-footer" style="font-size: 12px;">Promedio días por programa</div>
+            </div>
+        </div>
+        <div class="col-xs-6 col-lg-3">
+            <div class="panel panel-default text-center">
+                <div id="programasEvaluacion" class="panel-body" style="font-size: 24px; font-weight: 400;">-</div>
+                <div class="panel-footer" style="font-size: 12px;">Programas en evaluación</div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-12 col-lg-6">
+            <div class="panel panel-default text-center">
+                <div class="panel-heading">Porcentaje de presupuesto evaluado</div>
+                <div class="panel-body" style="padding: 0;">
+                    <div class="contenedor" style="overflow: hidden; height: 287px;">
+                        <figure class="highcharts-figure">
+                            <div id="presupuestoEvaluado" class="chart-container-1"></div>
+                        </figure>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-lg-6">
+            <div class="panel panel-default text-center">
+                <figure class="highcharts-figure">
+                    <div id="tipoProgramas"></div>
+                </figure>
+            </div>
+        </div>
+        <div class="col-xs-12 col-lg-6">
+            <div class="panel panel-default text-center">
+                <figure class="highcharts-figure">
+                    <div id="calificacionProgramas"></div>
+                </figure>
+            </div>
+        </div>
+        <div class="col-xs-12 col-lg-6">
+            <div class="panel panel-default text-center">
+                <figure class="highcharts-figure">
+                    <div id="estadoProgramas"></div>
+                </figure>
+            </div>
+        </div>
+        <div class="col-xs-12 col-lg-6">
+            <div class="panel panel-default text-center" style="height: 330px; overflow-y: scroll;">
+                <div class="panel-heading">Número de programas por etapa</div>
+                <div class="panel-body" style="margin-bottom: 0; padding: 0;">
+                    <table id="tablaEtapa" class="table table-striped striped-table">
+                        <thead style="font-size: 12px;">
+                            <tr>
+                                <th>Etapa</th>
+                                <th>Nº</th>
+                            </tr>
+                        </thead>
+                        <tbody style="font-size: 12px; text-align: left;">
+                            <tr>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <hr style="margin: 0; position: relative; top: -20px;" />
+                </div>
+                <div class="row" style="position: relative; bottom: 10px;">
+                    <div class="col-xs-6">Total</div>
+                    <div id="tablaTotal" class="col-xs-6">-</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-lg-6">
+            <div class="panel panel-default text-center">
+                <div class="panel-heading">Promedio puntaje</div>
+                <div class="panel-body" style="padding: 0;">
+                    <div class="contenedor" style="overflow: hidden; height: 287px;">
+                        <figure class="highcharts-figure">
+                            <div id="promedioPuntaje" class="chart-container-1"></div>
+                        </figure>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-12 col-lg-4">
+            <div class="panel panel-default text-center">
+                <div class="panel-heading">Promedio atingencia</div>
+                <div class="panel-body" style="padding: 0;">
+                    <div class="contenedor" style="overflow: hidden; height: 150px;">
+                        <figure class="highcharts-figure">
+                            <div id="promedioAtingencia" class="chart-container-2"></div>
+                        </figure>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-lg-4">
+            <div class="panel panel-default text-center">
+                <div class="panel-heading">Promedio coherencia</div>
+                <div class="panel-body" style="padding: 0;">
+                    <div class="contenedor" style="overflow: hidden; height: 150px;">
+                        <figure class="highcharts-figure">
+                            <div id="promedioCoherencia" class="chart-container-2"></div>
+                        </figure>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-lg-4">
+            <div class="panel panel-default text-center">
+                <div class="panel-heading">Promedio consistencia</div>
+                <div class="panel-body" style="padding: 0;">
+                    <div class="contenedor" style="overflow: hidden; height: 150px;">
+                        <figure class="highcharts-figure">
+                            <div id="promedioConsistencia" class="chart-container-2"></div>
+                        </figure>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="panel panel-default text-center">
+                <div class="panel-heading">Programas por número de iteración</div>
+                <div class="panel-body" style="padding: 0;">
+                    <figure class="highcharts-figure">
+                        <div id="programasIteracion"></div>
+                    </figure>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts {
+    @Scripts.Render("~/bundles/HighCharts")
+    <script type="text/javascript">
+        var servicios = @Html.Raw(Json.Encode(Model.servicios));
+        var indicadores = @Html.Raw(Json.Encode(Model.indicadores));
+        var tipoProgramas = @Html.Raw(Json.Encode(Model.tipoProgramas));
+        var califProgramas = @Html.Raw(Json.Encode(Model.califProgramas));
+        var estadoProgramas = @Html.Raw(Json.Encode(Model.estadoProgramas));
+        var programas = @Html.Raw(Json.Encode(Model.programas));
+        var evaluadores = @Html.Raw(Json.Encode(Model.evaluadores));
+        var progXIteracion = @Html.Raw(Json.Encode(Model.programasXiteracion));
+    </script>
+    @Scripts.Render("~/bundles/Dashboard")
+}

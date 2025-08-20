@@ -1,0 +1,121 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Sistema de Carga BIPS">
+    <meta name="author" content="Ministerio de Desarrollo Social y Familia">
+    <link href=@Url.Content("~/Content/Images/favicon.ico") rel="shortcut icon" type="image/x-icon" />
+    <title>@ViewBag.Title</title>
+    @Styles.Render("~/Content/Bootstrap_min")
+    @Styles.Render("~/Content/MetisMenu_min")
+    @Styles.Render("~/Content/APP")
+    @Styles.Render("~/Content/Sitio")
+    @RenderSection("styles", required: false)   
+    @Scripts.Render("~/bundles/modernizr")	
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->	
+</head>
+<body>
+    <div id="wrapper">
+        <div id="cargaPagina">            
+            <i class="fa fa-spinner fa-pulse fa-4x fa-fw"></i>
+            <span class="sr-only">Cargando...</span>
+        </div>        
+        <div id="page-wrapper2">
+            <header>
+                <div class="bicolor"><span class="blue"></span><span class="red"></span></div>
+                <h2 class="blue" style="margin-top: 10px;">Sistema de reporte Monitoreo <strong>SES-DIPRES</strong></h2>
+            </header>
+            <section id="content">
+                @{ Html.RenderAction("_Menu", "Home"); }
+                @RenderBody()
+            </section>
+        </div>
+        <footer>
+            <div class="wrapper clearfix" style="min-height:245px;">
+                <div class="bicolor"><span class="blue"></span><span class="red"></span></div>
+                <div class="top">
+                    <div class="listas"></div>
+                    <div class="cf"></div>
+                </div>
+                <div class="bottom">
+                    <div class="cf"></div>
+                    <div class="col-lg-8" style="text-align:left;padding-left:0px;">
+                            <div class="col-lg-3 logo">
+                                <a href="http://www.desarrollosocialyfamilia.gob.cl/" target="_blank"><span>Ministerio de Desarrollo Social y Familia</span></a>
+                            </div>
+                            <div class="col-lg-3 logo2">
+                                <a href="http://www.dipres.gob.cl/598/w3-channel.html" target="_blank"><span>Dirección de Presupuestos</span></a>
+                            </div>
+                            <div class="col-lg-6" style="padding-left: 0px; margin-left: 0px;">
+                                <span>Subsecretaría de Evaluación Social - Dirección de Presupuestos - Gobierno de Chile</span>
+                            </div>
+                    </div>
+                    <div class="col-lg-4" style="text-align: right; margin-top: 10px; padding-right: 0px;"><span style="text-align:right">v5.0</span></div>
+                </div>
+            </div>
+        </footer>
+    </div>
+    <!--Modal ayuda-->
+    <div id="modalGblAyuda" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Información</h4>
+                </div>
+                <div class="modal-body" id="msjAyudaGral"></div>
+                <div class="modal-footer">
+                    <button id="btnMsjGblAyudaCerrar" type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+    <!--Modal mensajes-->
+    <div id="modalGblMensajes" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">                    
+                    <h4 class="modal-title">Información</h4>
+                </div>
+                <div class="modal-body">
+                    <p>Su sesion ha finalizado. ¿Desea renovarla?</p>
+                </div>
+                <div class="modal-footer">
+                    <button id="btnMsjGblAceptar" type="button" class="btn btn-primary" data-dismiss="modal">Aceptar</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+    <script type="text/javascript">
+        var ROOT = "@Url.Content("~/")";
+        var url = "@HttpContext.Current.Request.Url.PathAndQuery";
+        //Cierra sesion automaticamente
+        function cierraSesionAuto() {
+            var opciones = {
+                url: ROOT + "Home/LogOff",
+                type: "post",
+                datatype: "json",
+                success: function (result, xhr, status) {
+                    window.location.replace(ROOT + "Login/Login?ReturnUrl=" + encodeURIComponent(url));
+                },
+                error: function (xhr, status, error) {
+                    console.log(error);
+                }
+            };
+            $.ajax(opciones);
+        }        
+    </script>    
+	@Scripts.Render("~/bundles/Jquery_2_1_4")
+    @Scripts.Render("~/bundles/Jquery_ui")
+    @Scripts.Render("~/bundles/Boostrap")
+    @Scripts.Render("~/bundles/MetisMenu")
+    @Scripts.Render("~/bundles/SbAdmin")
+    @RenderSection("scripts", required: false)
+</body>
+</html>

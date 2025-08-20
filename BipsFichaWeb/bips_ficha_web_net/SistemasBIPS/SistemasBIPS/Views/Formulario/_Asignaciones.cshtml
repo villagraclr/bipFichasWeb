@@ -1,0 +1,187 @@
+﻿@using SistemasBIPS.Models
+@model AsignacionesFormulariosPartialView
+@{ 
+    var idPreguntaTab = (Model.idPregunta == "6757" ? "6772" : "6860");
+    var idCmbAsignaciones = (Model.idPregunta == "6757" ? "4255" : "6861");
+    var idPreguntaItem = (Model.idPregunta == "6757" ? "6773" : "6862");
+    var idPreguntaAsig = (Model.idPregunta == "6757" ? "6774" : "6863");
+    var idPreguntaGasto = (Model.idPregunta == "6757" ? "6775" : "6864");
+    int indiceUnico = 1;
+}
+<div class="col-sm-12">
+    <ul id="ultabHijo@(Model.idPregunta.ToString())" class="nav nav-tabs">
+        @for (decimal? z = 21; z <= 35; z++)
+        {
+            if (z != 26 && z != 27 && z != 28)
+            {
+                if (idPreguntaTab == "6860" && (z == 21 || z == 22 || z == 24 || z == 29))
+                {
+                    <li role="presentation" @(z == 21 ? "class=active" : string.Empty)><a href="#tabHijo@(Model.id.ToString() + z.ToString() + Model.idTab.ToString())" data-toggle="tab">Sub. @z</a></li>
+                }
+                else if (idPreguntaTab == "6772")
+                {
+                    <li role="presentation" @(z == 21 ? "class=active" : string.Empty)><a href="#tabHijo@(Model.id.ToString() + z.ToString() + Model.idTab.ToString())" data-toggle="tab">Sub. @z</a></li>
+                }
+            }
+        }
+    </ul>
+    <div id="tabHijo@(Model.idPregunta.ToString())" class="tab-content">
+            @for (decimal? z = 21; z <= 35; z++)
+            {
+                bool ga = (idPreguntaTab == "6860" ? ((z == 21 || z == 22 || z == 24 || z == 29) ? true : false) : false);
+                if (z != 26 && z != 27 && z != 28)
+                {
+                    int totalAsig = (z == 24 && !ga ? 25 : 15);
+                    if (ga || idPreguntaTab != "6860")
+                    {
+                        <div class="tab-pane fade @(z == 21 ? "in active" : string.Empty)" id="tabHijo@(Model.id.ToString() + z.ToString() + Model.idTab.ToString())">
+                            <div class="panel panel-default tab-sin-borde">
+                                <div class="panel-body form-horizontal">
+                                    @if ((z == 24 || z == 31 || z == 32 || z == 33) || ga)
+                                    {
+                                        <div class="form-group form-group-sm" id="divPregTab@(idCmbAsignaciones +  Model.idTab.ToString() + z.ToString())">
+                                            <label for="cmb@(idCmbAsignaciones + Model.idTab + z.ToString())" class="col-sm-4 control-label">@(idPreguntaItem == "6862" && z != 24 ? "¿Cantidad de items?" : "¿Cantidad de asignaciones?")</label>
+                                            <div class="col-sm-6">
+                                                @{ string cmbSoloLectura = (Model.excepcionesPreguntas.Count(p => p.IdPregunta == decimal.Parse(idCmbAsignaciones)) > 0 ? string.Empty : "disabled"); }
+                                                <input type="hidden" name="model.preguntas[@Model.indicePregunta].id" value="@(idCmbAsignaciones)" />
+                                                <input type="hidden" id="numTab@(idCmbAsignaciones + Model.idTab + z.ToString())" name="model.preguntas[@Model.indicePregunta].idTab" value="@(Model.idTab + z.ToString())" />
+                                                <input type="hidden" id="idLlave@(idCmbAsignaciones + Model.idTab + z.ToString())" value="@(indiceUnico)" />
+                                                <select class="form-control input-sm numTab-@Model.idTab" name="model.preguntas[@Model.indicePregunta].respuesta" id="cmb@(idCmbAsignaciones + Model.idTab + z.ToString())" @(cmbSoloLectura)>
+                                                    @for (decimal? x = 1; x <= totalAsig; x++)
+                                                    {
+                                                        var respuestaCmb = (Model.respuestas.Count(p => p.IdPregunta == decimal.Parse(idCmbAsignaciones) && p.IdTab == decimal.Parse(Model.idTab + z.ToString())) > 0 ? Model.respuestas.SingleOrDefault(p => p.IdPregunta == decimal.Parse(idCmbAsignaciones) && p.IdTab == decimal.Parse(Model.idTab + z.ToString())).Respuesta : string.Empty);
+                                                        <option value="@(x)" @(!string.IsNullOrEmpty(respuestaCmb.ToString()) ? (decimal.Parse(respuestaCmb.ToString()) == x ? "selected=selected" : string.Empty) : string.Empty)>@x</option>
+                                                    }
+                                                </select>
+                                                @{ Model.indicePregunta++; }
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-12">
+                                            <ul id="ultabNieto@(Model.idTab + z.ToString() + idPreguntaTab + indiceUnico.ToString())" class="nav nav-tabs">
+                                                @for (decimal? y = 1; y <= totalAsig; y++)
+                                                {
+                                                    <li role="presentation" @(y == 1 ? "class=active" : string.Empty)><a href="#tabNieto@(Model.idTab + z.ToString() + y.ToString() + idPreguntaTab + indiceUnico.ToString())" data-toggle="tab">@y</a></li>
+                                                }
+                                            </ul>
+                                            <div id="tabNieto@(idPreguntaTab)" class="tab-content">
+                                                @for (decimal? y = 1; y <= totalAsig; y++)
+                                                {
+                                                    <div class="tab-pane fade @(y == 1 ? "in active" : string.Empty)" id="tabNieto@(Model.idTab + z.ToString() + y.ToString() + idPreguntaTab + indiceUnico.ToString())">
+                                                        <div class="panel panel-default tab-sin-borde">
+                                                            <div class="panel-body form-horizontal">
+                                                                <div class="form-group form-group-sm" id="divPregTab@(Model.idTab + z.ToString() + y.ToString() + idPreguntaItem + indiceUnico.ToString())">
+                                                                    <label for="txt@(Model.idTab + z.ToString() + idPreguntaItem)" class="col-sm-4 control-label">Item</label>
+                                                                    <div class="col-sm-6">
+                                                                        <input type="hidden" name="model.preguntas[@Model.indicePregunta].id" value="@(idPreguntaItem)" />
+                                                                        <input type="hidden" id="numTab@(Model.idTab + z.ToString() + idPreguntaItem)" name="model.preguntas[@Model.indicePregunta].idTab" value="@(Model.idTab + z.ToString() + y.ToString() + indiceUnico.ToString())" />
+                                                                        @if (idPreguntaItem == "6862")
+                                                                        {
+                                                                            <select class="form-control input-sm numTab-@Model.idTab" name="model.preguntas[@Model.indicePregunta].respuesta" id="cmb@(Model.idTab + z.ToString() + idPreguntaItem + indiceUnico.ToString())" @(Model.excepcionesPreguntas.Count(p => p.IdPregunta == decimal.Parse(idPreguntaItem)) > 0 ? string.Empty : "disabled")>
+                                                                                @if (z == 21)
+                                                                                {
+                                                                                    <option value="1" @(Model.respuestas.Count(p => p.IdPregunta == decimal.Parse(idPreguntaItem) && p.IdTab == decimal.Parse(Model.idTab + z.ToString() + y.ToString() + indiceUnico.ToString())) > 0 ? (Model.respuestas.SingleOrDefault(p => p.IdPregunta == decimal.Parse(idPreguntaItem) && p.IdTab == decimal.Parse(Model.idTab + z.ToString() + y.ToString() + indiceUnico.ToString())).Respuesta.ToString() == "1" ? "selected=selected" : string.Empty) : string.Empty)>01-Personal de Planta</option>
+                                                                                    <option value="2" @(Model.respuestas.Count(p => p.IdPregunta == decimal.Parse(idPreguntaItem) && p.IdTab == decimal.Parse(Model.idTab + z.ToString() + y.ToString() + indiceUnico.ToString())) > 0 ? (Model.respuestas.SingleOrDefault(p => p.IdPregunta == decimal.Parse(idPreguntaItem) && p.IdTab == decimal.Parse(Model.idTab + z.ToString() + y.ToString() + indiceUnico.ToString())).Respuesta.ToString() == "2" ? "selected=selected" : string.Empty) : string.Empty)>02-Personal a Contrata</option>
+                                                                                    <option value="3" @(Model.respuestas.Count(p => p.IdPregunta == decimal.Parse(idPreguntaItem) && p.IdTab == decimal.Parse(Model.idTab + z.ToString() + y.ToString() + indiceUnico.ToString())) > 0 ? (Model.respuestas.SingleOrDefault(p => p.IdPregunta == decimal.Parse(idPreguntaItem) && p.IdTab == decimal.Parse(Model.idTab + z.ToString() + y.ToString() + indiceUnico.ToString())).Respuesta.ToString() == "3" ? "selected=selected" : string.Empty) : string.Empty)>03-Otras Remuneraciones</option>
+                                                                                    <option value="4" @(Model.respuestas.Count(p => p.IdPregunta == decimal.Parse(idPreguntaItem) && p.IdTab == decimal.Parse(Model.idTab + z.ToString() + y.ToString() + indiceUnico.ToString())) > 0 ? (Model.respuestas.SingleOrDefault(p => p.IdPregunta == decimal.Parse(idPreguntaItem) && p.IdTab == decimal.Parse(Model.idTab + z.ToString() + y.ToString() + indiceUnico.ToString())).Respuesta.ToString() == "4" ? "selected=selected" : string.Empty) : string.Empty)>04-Otros Gastos en Personal</option>
+                                                                                }
+                                                                                else if (z == 22)
+                                                                                {
+                                                                                    <option value="5" @(Model.respuestas.Count(p => p.IdPregunta == decimal.Parse(idPreguntaItem) && p.IdTab == decimal.Parse(Model.idTab + z.ToString() + y.ToString() + indiceUnico.ToString())) > 0 ? (Model.respuestas.SingleOrDefault(p => p.IdPregunta == decimal.Parse(idPreguntaItem) && p.IdTab == decimal.Parse(Model.idTab + z.ToString() + y.ToString() + indiceUnico.ToString())).Respuesta.ToString() == "5" ? "selected=selected" : string.Empty) : string.Empty)>01-Alimentos y Bebidas</option>
+                                                                                    <option value="6" @(Model.respuestas.Count(p => p.IdPregunta == decimal.Parse(idPreguntaItem) && p.IdTab == decimal.Parse(Model.idTab + z.ToString() + y.ToString() + indiceUnico.ToString())) > 0 ? (Model.respuestas.SingleOrDefault(p => p.IdPregunta == decimal.Parse(idPreguntaItem) && p.IdTab == decimal.Parse(Model.idTab + z.ToString() + y.ToString() + indiceUnico.ToString())).Respuesta.ToString() == "6" ? "selected=selected" : string.Empty) : string.Empty)>02-Textiles, Vestuario y Calzado</option>
+                                                                                    <option value="7" @(Model.respuestas.Count(p => p.IdPregunta == decimal.Parse(idPreguntaItem) && p.IdTab == decimal.Parse(Model.idTab + z.ToString() + y.ToString() + indiceUnico.ToString())) > 0 ? (Model.respuestas.SingleOrDefault(p => p.IdPregunta == decimal.Parse(idPreguntaItem) && p.IdTab == decimal.Parse(Model.idTab + z.ToString() + y.ToString() + indiceUnico.ToString())).Respuesta.ToString() == "7" ? "selected=selected" : string.Empty) : string.Empty)>03-Combustibles y Lubricantes</option>
+                                                                                    <option value="8" @(Model.respuestas.Count(p => p.IdPregunta == decimal.Parse(idPreguntaItem) && p.IdTab == decimal.Parse(Model.idTab + z.ToString() + y.ToString() + indiceUnico.ToString())) > 0 ? (Model.respuestas.SingleOrDefault(p => p.IdPregunta == decimal.Parse(idPreguntaItem) && p.IdTab == decimal.Parse(Model.idTab + z.ToString() + y.ToString() + indiceUnico.ToString())).Respuesta.ToString() == "8" ? "selected=selected" : string.Empty) : string.Empty)>04-Materiales de Uso o Consumo</option>
+                                                                                    <option value="9" @(Model.respuestas.Count(p => p.IdPregunta == decimal.Parse(idPreguntaItem) && p.IdTab == decimal.Parse(Model.idTab + z.ToString() + y.ToString() + indiceUnico.ToString())) > 0 ? (Model.respuestas.SingleOrDefault(p => p.IdPregunta == decimal.Parse(idPreguntaItem) && p.IdTab == decimal.Parse(Model.idTab + z.ToString() + y.ToString() + indiceUnico.ToString())).Respuesta.ToString() == "9" ? "selected=selected" : string.Empty) : string.Empty)>05-Servicios Básicos</option>
+                                                                                    <option value="10" @(Model.respuestas.Count(p => p.IdPregunta == decimal.Parse(idPreguntaItem) && p.IdTab == decimal.Parse(Model.idTab + z.ToString() + y.ToString() + indiceUnico.ToString())) > 0 ? (Model.respuestas.SingleOrDefault(p => p.IdPregunta == decimal.Parse(idPreguntaItem) && p.IdTab == decimal.Parse(Model.idTab + z.ToString() + y.ToString() + indiceUnico.ToString())).Respuesta.ToString() == "10" ? "selected=selected" : string.Empty) : string.Empty)>06-Mantenimiento y Reparaciones</option>
+                                                                                    <option value="11" @(Model.respuestas.Count(p => p.IdPregunta == decimal.Parse(idPreguntaItem) && p.IdTab == decimal.Parse(Model.idTab + z.ToString() + y.ToString() + indiceUnico.ToString())) > 0 ? (Model.respuestas.SingleOrDefault(p => p.IdPregunta == decimal.Parse(idPreguntaItem) && p.IdTab == decimal.Parse(Model.idTab + z.ToString() + y.ToString() + indiceUnico.ToString())).Respuesta.ToString() == "11" ? "selected=selected" : string.Empty) : string.Empty)>07-Publicidad y Difusión</option>
+                                                                                    <option value="12" @(Model.respuestas.Count(p => p.IdPregunta == decimal.Parse(idPreguntaItem) && p.IdTab == decimal.Parse(Model.idTab + z.ToString() + y.ToString() + indiceUnico.ToString())) > 0 ? (Model.respuestas.SingleOrDefault(p => p.IdPregunta == decimal.Parse(idPreguntaItem) && p.IdTab == decimal.Parse(Model.idTab + z.ToString() + y.ToString() + indiceUnico.ToString())).Respuesta.ToString() == "12" ? "selected=selected" : string.Empty) : string.Empty)>08-Servicios Generales</option>
+                                                                                    <option value="13" @(Model.respuestas.Count(p => p.IdPregunta == decimal.Parse(idPreguntaItem) && p.IdTab == decimal.Parse(Model.idTab + z.ToString() + y.ToString() + indiceUnico.ToString())) > 0 ? (Model.respuestas.SingleOrDefault(p => p.IdPregunta == decimal.Parse(idPreguntaItem) && p.IdTab == decimal.Parse(Model.idTab + z.ToString() + y.ToString() + indiceUnico.ToString())).Respuesta.ToString() == "13" ? "selected=selected" : string.Empty) : string.Empty)>09-Arriendos</option>
+                                                                                    <option value="14" @(Model.respuestas.Count(p => p.IdPregunta == decimal.Parse(idPreguntaItem) && p.IdTab == decimal.Parse(Model.idTab + z.ToString() + y.ToString() + indiceUnico.ToString())) > 0 ? (Model.respuestas.SingleOrDefault(p => p.IdPregunta == decimal.Parse(idPreguntaItem) && p.IdTab == decimal.Parse(Model.idTab + z.ToString() + y.ToString() + indiceUnico.ToString())).Respuesta.ToString() == "14" ? "selected=selected" : string.Empty) : string.Empty)>10-Servicios Financieros y de Seguros</option>
+                                                                                    <option value="15" @(Model.respuestas.Count(p => p.IdPregunta == decimal.Parse(idPreguntaItem) && p.IdTab == decimal.Parse(Model.idTab + z.ToString() + y.ToString() + indiceUnico.ToString())) > 0 ? (Model.respuestas.SingleOrDefault(p => p.IdPregunta == decimal.Parse(idPreguntaItem) && p.IdTab == decimal.Parse(Model.idTab + z.ToString() + y.ToString() + indiceUnico.ToString())).Respuesta.ToString() == "15" ? "selected=selected" : string.Empty) : string.Empty)>11-Servicios</option>
+                                                                                    <option value="16" @(Model.respuestas.Count(p => p.IdPregunta == decimal.Parse(idPreguntaItem) && p.IdTab == decimal.Parse(Model.idTab + z.ToString() + y.ToString() + indiceUnico.ToString())) > 0 ? (Model.respuestas.SingleOrDefault(p => p.IdPregunta == decimal.Parse(idPreguntaItem) && p.IdTab == decimal.Parse(Model.idTab + z.ToString() + y.ToString() + indiceUnico.ToString())).Respuesta.ToString() == "16" ? "selected=selected" : string.Empty) : string.Empty)>12-Otros Gastos en Bienes y Servicios de Consumo</option>
+                                                                                }
+                                                                                else if (z == 24)
+                                                                                {
+                                                                                    <option value="17" @(Model.respuestas.Count(p => p.IdPregunta == decimal.Parse(idPreguntaItem) && p.IdTab == decimal.Parse(Model.idTab + z.ToString() + y.ToString() + indiceUnico.ToString())) > 0 ? (Model.respuestas.SingleOrDefault(p => p.IdPregunta == decimal.Parse(idPreguntaItem) && p.IdTab == decimal.Parse(Model.idTab + z.ToString() + y.ToString() + indiceUnico.ToString())).Respuesta.ToString() == "17" ? "selected=selected" : string.Empty) : string.Empty)>01-Transf. al sector privado (1-3)</option>
+                                                                                    <option value="18" @(Model.respuestas.Count(p => p.IdPregunta == decimal.Parse(idPreguntaItem) && p.IdTab == decimal.Parse(Model.idTab + z.ToString() + y.ToString() + indiceUnico.ToString())) > 0 ? (Model.respuestas.SingleOrDefault(p => p.IdPregunta == decimal.Parse(idPreguntaItem) && p.IdTab == decimal.Parse(Model.idTab + z.ToString() + y.ToString() + indiceUnico.ToString())).Respuesta.ToString() == "18" ? "selected=selected" : string.Empty) : string.Empty)>02-Al Gobierno Central</option>
+                                                                                    <option value="19" @(Model.respuestas.Count(p => p.IdPregunta == decimal.Parse(idPreguntaItem) && p.IdTab == decimal.Parse(Model.idTab + z.ToString() + y.ToString() + indiceUnico.ToString())) > 0 ? (Model.respuestas.SingleOrDefault(p => p.IdPregunta == decimal.Parse(idPreguntaItem) && p.IdTab == decimal.Parse(Model.idTab + z.ToString() + y.ToString() + indiceUnico.ToString())).Respuesta.ToString() == "19" ? "selected=selected" : string.Empty) : string.Empty)>03-Transf. a otras entidades públicas</option>
+                                                                                }
+                                                                                else if (z == 29)
+                                                                                {
+                                                                                    <option value="25" @(Model.respuestas.Count(p => p.IdPregunta == decimal.Parse(idPreguntaItem) && p.IdTab == decimal.Parse(Model.idTab + z.ToString() + y.ToString() + indiceUnico.ToString())) > 0 ? (Model.respuestas.SingleOrDefault(p => p.IdPregunta == decimal.Parse(idPreguntaItem) && p.IdTab == decimal.Parse(Model.idTab + z.ToString() + y.ToString() + indiceUnico.ToString())).Respuesta.ToString() == "25" ? "selected=selected" : string.Empty) : string.Empty)>06-Equipos Informáticos</option>
+                                                                                    <option value="26" @(Model.respuestas.Count(p => p.IdPregunta == decimal.Parse(idPreguntaItem) && p.IdTab == decimal.Parse(Model.idTab + z.ToString() + y.ToString() + indiceUnico.ToString())) > 0 ? (Model.respuestas.SingleOrDefault(p => p.IdPregunta == decimal.Parse(idPreguntaItem) && p.IdTab == decimal.Parse(Model.idTab + z.ToString() + y.ToString() + indiceUnico.ToString())).Respuesta.ToString() == "26" ? "selected=selected" : string.Empty) : string.Empty)>07-Programas Informáticos</option>
+                                                                                }                                                                                
+                                                                            </select>
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            <input type="text" name="model.preguntas[@Model.indicePregunta].respuesta" class="form-control input-sm numTab-@Model.idTab" id="txt@(Model.idTab + z.ToString() + idPreguntaItem + indiceUnico.ToString())" maxlength="15" onkeypress="return soloNumeros(event,true);" placeholder="Ingrese registro" value="@(Model.respuestas.Count(p => p.IdPregunta == decimal.Parse(idPreguntaItem) && p.IdTab == decimal.Parse(Model.idTab + z.ToString() + y.ToString() + indiceUnico.ToString())) > 0 ? Model.respuestas.SingleOrDefault(p => p.IdPregunta == decimal.Parse(idPreguntaItem) && p.IdTab == decimal.Parse(Model.idTab + z.ToString() + y.ToString() + indiceUnico.ToString())).Respuesta : string.Empty)" @(Model.excepcionesPreguntas.Count(p => p.IdPregunta == decimal.Parse(idPreguntaItem)) > 0 ? string.Empty : "readonly") />
+                                                                        }
+                                                                    </div>
+                                                                </div>
+                                                                @{ Model.indicePregunta++; }
+                                                                @if (idPreguntaAsig != "6863" || z == 24)
+                                                                {
+                                                                    <div class="form-group form-group-sm" id="divPregTab@(Model.idTab + z.ToString() + y.ToString() + idPreguntaAsig + indiceUnico.ToString())">
+                                                                        <label for="txt@(Model.idTab + z.ToString() + idPreguntaAsig + indiceUnico.ToString())" class="col-sm-4 control-label">Asignación</label>
+                                                                        <div class="col-sm-6">
+                                                                            <input type="hidden" name="model.preguntas[@Model.indicePregunta].id" value="@(idPreguntaAsig)" />
+                                                                            <input type="hidden" id="numTab@(Model.idTab + z.ToString() + idPreguntaAsig + indiceUnico.ToString())" name="model.preguntas[@Model.indicePregunta].idTab" value="@(Model.idTab + z.ToString() + y.ToString() + indiceUnico.ToString())" />
+                                                                            <input type="text" name="model.preguntas[@Model.indicePregunta].respuesta" class="form-control input-sm numTab-@Model.idTab" id="txt@(Model.idTab + z.ToString() + idPreguntaAsig + indiceUnico.ToString())" maxlength="15" onkeypress="return soloNumeros(event,true);" placeholder="Ingrese registro" value="@(Model.respuestas.Count(p=>p.IdPregunta==decimal.Parse(idPreguntaAsig) && p.IdTab == decimal.Parse(Model.idTab + z.ToString() + y.ToString() + indiceUnico.ToString())) > 0 ? Model.respuestas.SingleOrDefault(p=>p.IdPregunta==decimal.Parse(idPreguntaAsig) && p.IdTab == decimal.Parse(Model.idTab + z.ToString() + y.ToString() + indiceUnico.ToString())).Respuesta : string.Empty)" @(Model.excepcionesPreguntas.Count(p => p.IdPregunta == decimal.Parse(idPreguntaAsig)) > 0 ? string.Empty : "readonly") />
+                                                                        </div>
+                                                                    </div>
+                                                                    Model.indicePregunta++;
+                                                                }
+                                                                <div class="form-group form-group-sm" id="divPregTab@(Model.idTab + z.ToString() + y.ToString() + idPreguntaGasto + indiceUnico.ToString())">
+                                                                    <label for="txt@(Model.idTab + z.ToString() + idPreguntaGasto + indiceUnico.ToString())" class="col-sm-4 control-label">Gasto ($miles)</label>
+                                                                    <div class="col-sm-6">
+                                                                        <input type="hidden" name="model.preguntas[@Model.indicePregunta].id" value="@(idPreguntaGasto)" />
+                                                                        <input type="hidden" id="numTab@(Model.idTab + z.ToString() + idPreguntaGasto + indiceUnico.ToString())" name="model.preguntas[@Model.indicePregunta].idTab" value="@(Model.idTab + z.ToString() + y.ToString() + indiceUnico.ToString())" />
+                                                                        <input type="text" name="model.preguntas[@Model.indicePregunta].respuesta" class="form-control input-sm numTab-@Model.idTab suma@(Model.idPregunta.ToString())" id="txt@(Model.idTab + z.ToString() + idPreguntaGasto + indiceUnico.ToString())" maxlength="15" onkeypress="return soloNumeros(event,true);" placeholder="Ingrese registro" value="@(Model.respuestas.Count(p=>p.IdPregunta==decimal.Parse(idPreguntaGasto) && p.IdTab == decimal.Parse(Model.idTab + z.ToString() + y.ToString() + indiceUnico.ToString())) > 0 ? Model.respuestas.SingleOrDefault(p=>p.IdPregunta==decimal.Parse(idPreguntaGasto) && p.IdTab == decimal.Parse(Model.idTab + z.ToString() + y.ToString() + indiceUnico.ToString())).Respuesta : string.Empty)" @(Model.excepcionesPreguntas.Count(p => p.IdPregunta == decimal.Parse(idPreguntaGasto)) > 0 ? string.Empty : "readonly") />
+                                                                    </div>
+                                                                </div>
+                                                                @{ Model.indicePregunta++; }
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                        }
+                                        else {
+                                            <div class="form-group form-group-sm" id="divPregTab@(Model.idTab + z.ToString() + idPreguntaItem + indiceUnico.ToString())">
+                                                <label for="txt@(Model.idTab + z.ToString() + idPreguntaItem + indiceUnico.ToString())" class="col-sm-4 control-label">Item</label>
+                                                <div class="col-sm-6">
+                                                    <input type="hidden" name="model.preguntas[@Model.indicePregunta].id" value="@(idPreguntaItem)" />
+                                                    <input type="hidden" id="numTab@(Model.idTab + z.ToString() + idPreguntaItem + indiceUnico.ToString())" name="model.preguntas[@Model.indicePregunta].idTab" value="@(Model.idTab + z.ToString() + indiceUnico.ToString())" />                                                                                
+                                                    <input type="text" name="model.preguntas[@Model.indicePregunta].respuesta" class="form-control input-sm numTab-@Model.idTab" id="txt@(Model.idTab + z.ToString() + idPreguntaItem + indiceUnico.ToString())" maxlength="15" onkeypress="return soloNumeros(event,true);" placeholder="Ingrese registro" value="@(Model.respuestas.Count(p => p.IdPregunta == decimal.Parse(idPreguntaItem) && p.IdTab == decimal.Parse(Model.idTab + z.ToString() + indiceUnico.ToString())) > 0 ? Model.respuestas.SingleOrDefault(p => p.IdPregunta == decimal.Parse(idPreguntaItem) && p.IdTab == decimal.Parse(Model.idTab + z.ToString() + indiceUnico.ToString())).Respuesta : string.Empty)" @(Model.excepcionesPreguntas.Count(p => p.IdPregunta == decimal.Parse(idPreguntaItem)) > 0 ? string.Empty : "readonly") />                                                                                
+                                                </div>
+                                            </div>
+                                            Model.indicePregunta++;
+                                            <div class="form-group form-group-sm" id="divPregTab@(Model.idTab + z.ToString() + idPreguntaAsig + indiceUnico.ToString())">
+                                                <label for="txt@(Model.idTab + z.ToString() + idPreguntaAsig + indiceUnico.ToString())" class="col-sm-4 control-label">Asignación</label>
+                                                <div class="col-sm-6">
+                                                    <input type="hidden" name="model.preguntas[@Model.indicePregunta].id" value="@(idPreguntaAsig)" />
+                                                    <input type="hidden" id="numTab@(Model.idTab + z.ToString() + idPreguntaAsig + indiceUnico.ToString())" name="model.preguntas[@Model.indicePregunta].idTab" value="@(Model.idTab + z.ToString() + indiceUnico.ToString())" />
+                                                    <input type="text" name="model.preguntas[@Model.indicePregunta].respuesta" class="form-control input-sm numTab-@Model.idTab" id="txt@(Model.idTab + z.ToString() + idPreguntaAsig + indiceUnico.ToString())" maxlength="15" onkeypress="return soloNumeros(event,true);" placeholder="Ingrese registro" value="@(Model.respuestas.Count(p=>p.IdPregunta==decimal.Parse(idPreguntaAsig) && p.IdTab == decimal.Parse(Model.idTab + z.ToString() + indiceUnico.ToString())) > 0 ? Model.respuestas.SingleOrDefault(p=>p.IdPregunta==decimal.Parse(idPreguntaAsig) && p.IdTab == decimal.Parse(Model.idTab + z.ToString() + indiceUnico.ToString())).Respuesta : string.Empty)" @(Model.excepcionesPreguntas.Count(p => p.IdPregunta == decimal.Parse(idPreguntaAsig)) > 0 ? string.Empty : "readonly") />
+                                                </div>
+                                            </div>
+                                            Model.indicePregunta++;
+                                            <div class="form-group form-group-sm" id="divPregTab@(Model.idTab + z.ToString() + idPreguntaGasto + indiceUnico.ToString())">
+                                                <label for="txt@(Model.idTab + z.ToString() + idPreguntaGasto + indiceUnico.ToString())" class="col-sm-4 control-label">Gasto ($miles)</label>
+                                                <div class="col-sm-6">
+                                                    <input type="hidden" name="model.preguntas[@Model.indicePregunta].id" value="@(idPreguntaGasto)" />
+                                                    <input type="hidden" id="numTab@(Model.idTab + z.ToString() + idPreguntaGasto + indiceUnico.ToString())" name="model.preguntas[@Model.indicePregunta].idTab" value="@(Model.idTab + z.ToString() + indiceUnico.ToString())" />
+                                                    <input type="text" name="model.preguntas[@Model.indicePregunta].respuesta" class="form-control input-sm numTab-@Model.idTab suma@(Model.idPregunta.ToString())" id="txt@(Model.idTab + z.ToString() + idPreguntaGasto + indiceUnico.ToString())" maxlength="15" onkeypress="return soloNumeros(event,true);" placeholder="Ingrese registro" value="@(Model.respuestas.Count(p=>p.IdPregunta==decimal.Parse(idPreguntaGasto) && p.IdTab == decimal.Parse(Model.idTab + z.ToString() + indiceUnico.ToString())) > 0 ? Model.respuestas.SingleOrDefault(p=>p.IdPregunta==decimal.Parse(idPreguntaGasto) && p.IdTab == decimal.Parse(Model.idTab + z.ToString() + indiceUnico.ToString())).Respuesta : string.Empty)" @(Model.excepcionesPreguntas.Count(p => p.IdPregunta == decimal.Parse(idPreguntaGasto)) > 0 ? string.Empty : "readonly") />
+                                                </div>
+                                            </div>
+                                            Model.indicePregunta++;
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        indiceUnico++;
+                    }
+                }
+            }
+    </div>
+</div>

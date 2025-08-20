@@ -1,0 +1,122 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@{
+    ViewBag.Title = "Ministerio de Desarrollo Social - Gobierno de Chile";
+}
+@section styles {
+    @Styles.Render("~/Content/Fonts_min")
+}
+<div id="page-wrapper">
+    <div class="row">
+        <div class="col-lg-12">
+            <h1 class="page-header" style="margin-top:10px"><small>Mis Mensajes</small></h1>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-12">
+            <ul class="nav nav-tabs">
+                <li class="active"><a href="#noleidos" data-toggle="tab">No leidos</a></li>
+                <li><a href="#leidos" data-toggle="tab">Leidos</a></li>
+            </ul>
+            <div class="tab-content">
+                <div class="tab-pane fade in active" id="noleidos" style="max-height:600px;overflow-y:auto">
+                    <div class="list-group" id="mensajesNoLeidos" style="margin-top:5px">
+                        @for (int x = 0; x < 5; x++)
+                        {
+                            <a href="#" id="mensaje@(x + 1)" class="list-group-item" data-toggle="modal" data-target="#modalMensajes" data-backdrop="static" data-keyboard="false" data-idmensaje="@(x + 1)" data-emisor="usuario.emisor@desarrollosocial.cl" data-tiempo="Hace @(x + 1) minutos" data-asunto="Lorem ipsum dolor sit amet, consectetur adipiscing elit." data-mensaje="Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.">
+                                <div>
+                                    <strong>usuario.emisor@desarrollosocial.cl</strong>
+                                    <span class="pull-right text-muted"><em>Hace @(x + 1) minutos</em></span>
+                                </div>
+                                <div>
+                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                                </div>
+                            </a>
+                        }
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="leidos">
+                    <div class="form-group input-group" style="margin-top:15px">
+                        <input type="text" class="form-control" placeholder="Buscar..." />
+                        <span class="input-group-btn">
+                            <button class="btn btn-default" type="button"><i class="fa fa-search"></i></button>
+                        </span>
+                    </div>
+                    <div class="list-group" style="margin-top:5px;max-height:600px;overflow-y:auto">
+                        @for (int x = 0; x < 10; x++)
+                        {
+                            <a href="#" class="list-group-item">
+                                <div>
+                                    <strong>usuario.emisor@desarrollosocial.cl</strong>
+                                    <span class="pull-right text-muted"><em>Hace @(x + 10) minutos</em></span>
+                                </div>
+                                <div>
+                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                                </div>
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal Mensajes-->
+<div class="modal fade" id="modalMensajes" tabindex="-1" role="dialog" aria-labelledby="modalLabelMensajes" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <input type="hidden" id="modalIdMensaje" value="" />
+                <h4 class="modal-title" id="modalLabelMensajes"></h4>
+                <span class="pull-right text-muted" style="margin-top:-4%"><em id="modalTiempo"></em></span>
+            </div>
+            <div class="modal-body"><h4 id="modalAsunto"></h4><p id="modalMensaje"></p></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="btnMensajeLeido">Aceptar</button>
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('ul.nav a').each(function () { if ($(this).hasClass('active')) { $(this).removeClass('active'); } });
+            $('#aMenuMensajes').addClass('active');
+            $('#modalMensajes').on('show.bs.modal', function (e) {
+                $('#modalLabelMensajes').text('');
+                $('#modalAsunto').text('');
+                $('#modalMensaje').text('');
+                $('#modalIdMensaje').val('');
+                var objMensaje = $(e.relatedTarget);
+                var asunto = objMensaje.data('asunto');
+                var emisor = objMensaje.data('emisor');
+                var mensaje = objMensaje.data('mensaje');
+                var tiempo = objMensaje.data('tiempo');
+                var idMensaje = objMensaje.data('idmensaje');
+                $('#modalLabelMensajes').text(emisor);
+                $('#modalAsunto').text(asunto);
+                $('#modalMensaje').text(mensaje);
+                $('#modalTiempo').text(tiempo);
+                $('#modalIdMensaje').val(idMensaje);
+                $('#modalLabelMensajes').css("font-weight", "Bold");
+            });
+            $('#modalMensajes').on('hidden.bs.modal', function (e) {
+                var idMensaje = $('#modalIdMensaje').val();
+                $('#mensaje' + idMensaje).remove();
+                if ($('#mensajesNoLeidos a').length == 0) {
+                    $('#mensajesNoLeidos').append("<div class='alert alert-success'>No hay mensajes por leer</div>");
+                    $('#indicadorNuevosMensajes').remove();
+                } else {
+                    $('#indicadorNuevosMensajes').text($('#mensajesNoLeidos a').length + ' Nuevos');
+                }
+            });
+            $('#btnMensajeLeido').click(function (e) {
+                $('#modalMensajes').modal('hide');
+            });
+            //$(document).on('hidden.bs.modal', function (e) {
+            //    $(e.target).removeData('bs.modal');
+            //});
+        });
+    </script>
+}
